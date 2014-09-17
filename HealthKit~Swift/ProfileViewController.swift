@@ -23,6 +23,9 @@ enum ProfileKeys : String {
 
 class ProfileViewController: UITableViewController {
     
+    let kProfileUnit = 0
+    let kProfileDetail = 1
+    
     var healthStore: HKHealthStore?
     var userProfiles: [ProfileKeys: [String]]?
     
@@ -50,6 +53,8 @@ class ProfileViewController: UITableViewController {
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
                 // Update the user interface based on the current user's health information.
                 self.updateUserAge()
+                self.updateUsersHeight()
+                self.updateUsersWeight()
             })
         }
         
@@ -122,13 +127,23 @@ class ProfileViewController: UITableViewController {
         
         if var userProfiles = self.userProfiles {
             var age: [String] = userProfiles[ProfileKeys.Age] as [String]!
-            age[1] = ageValue
+            age[kProfileDetail] = ageValue
             
             userProfiles[ProfileKeys.Age] = age
             self.userProfiles = userProfiles
         }
         
-        var indexPath: NSIndexPath = NSIndexPath(forRow: 0, inSection: 0)
+        var indexPath: NSIndexPath = NSIndexPath(forRow: ProfileViewControllerTableViewIndex.Age.toRaw(), inSection: 0)
+        self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
+    }
+    
+    func updateUsersHeight() -> Void {
+        var indexPath: NSIndexPath = NSIndexPath(forRow: ProfileViewControllerTableViewIndex.Height.toRaw(), inSection: 0)
+        self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
+    }
+    
+    func updateUsersWeight() -> Void {
+        var indexPath: NSIndexPath = NSIndexPath(forRow: ProfileViewControllerTableViewIndex.Weight.toRaw(), inSection: 0)
         self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
     }
     
