@@ -11,11 +11,29 @@ import UIKit
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    var mainViewController: MainViewController?
+    var secondViewController: SecondViewController?
+    
+    var tabBarController: UITabBarController?
+    
     var window: UIWindow?
-
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
+        
+        self.mainViewController = MainViewController()
+        self.secondViewController = SecondViewController()
+        
+        self.tabBarController = UITabBarController()
+        self.tabBarController!.viewControllers = [mainViewController!, secondViewController!]
+        
+        var screen: CGRect = UIScreen.mainScreen().bounds
+        
+        self.window = UIWindow(frame: screen)
+        self.window!.backgroundColor = UIColor.blackColor()
+        self.window!.rootViewController = tabBarController
+        self.window!.makeKeyAndVisible()
+        
         return true
     }
 
