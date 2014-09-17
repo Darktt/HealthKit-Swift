@@ -1,0 +1,9 @@
+/* 
+  InfoPlist.strings
+  HealthKit~Swift
+
+  Created by EdenLi on 2014/9/17.
+  Copyright (c) 2014年 Darktt Personal Company. All rights reserved.
+*/
+
+"CFBundleDisplayName" = "HealthKit";

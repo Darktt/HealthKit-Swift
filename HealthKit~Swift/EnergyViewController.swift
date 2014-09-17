@@ -1,5 +1,5 @@
 //
-//  MainViewController.swift
+//  EnergyViewController.swift
 //  HealthKit~Swift
 //
 //  Created by EdenLi on 2014/9/17.
@@ -7,16 +7,17 @@
 //
 
 import UIKit
+import HealthKit
 
-class MainViewController: UIViewController {
+class EnergyViewController: UIViewController {
+
+    var healthStore: HKHealthStore?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         // Do any additional setup after loading the view.
-        self.title = NSString.stringWithString("Main")
-        self.view.backgroundColor = UIColor.redColor()
-        self.tabBarItem.image = UIImage(named: "first")
+        self.title = self.navigationController?.title
     }
 
     override func didReceiveMemoryWarning() {

@@ -7,25 +7,48 @@
 //
 
 import UIKit
+import HealthKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    var mainViewController: MainViewController?
-    var secondViewController: SecondViewController?
     
     var tabBarController: UITabBarController?
     
     var window: UIWindow?
+    
+    let healthStore: HKHealthStore = HKHealthStore()
+    
+    func application(application: UIApplication, willFinishLaunchingWithOptions launchOptions: [NSObject : AnyObject]?) -> Bool {
+        
+        return true
+    }
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
         
-        self.mainViewController = MainViewController()
-        self.secondViewController = SecondViewController()
+        var profile: ProfileViewController = ProfileViewController()
+        profile.healthStore = self.healthStore
+        
+        var profileNavigtion: UINavigationController = UINavigationController(rootViewController: profile);
+        profileNavigtion.tabBarItem.image = UIImage(named: "profile")
+        profileNavigtion.title = "Profile"
+        
+        var journal: JournalViewController = JournalViewController()
+        journal.healthStore = self.healthStore
+        
+        var journalNavigtion: UINavigationController = UINavigationController(rootViewController: journal);
+        journalNavigtion.tabBarItem.image = UIImage(named: "journal")
+        journalNavigtion.title = "Journal"
+        
+        var energy: EnergyViewController = EnergyViewController()
+        energy.healthStore = self.healthStore
+        
+        var energyNavigtion: UINavigationController = UINavigationController(rootViewController: energy);
+        energyNavigtion.tabBarItem.image = UIImage(named: "energyburn")
+        energyNavigtion.title = "Energy"
         
         self.tabBarController = UITabBarController()
-        self.tabBarController!.viewControllers = [mainViewController!, secondViewController!]
+        self.tabBarController!.viewControllers = [profileNavigtion, journalNavigtion, energyNavigtion]
         
         var screen: CGRect = UIScreen.mainScreen().bounds
         
