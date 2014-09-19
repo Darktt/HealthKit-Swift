@@ -9,18 +9,21 @@
 import UIKit
 import HealthKit
 
-class EnergyViewController: UIViewController {
+class EnergyViewController: UITableViewController
+{
 
     var healthStore: HKHealthStore?
     
-    override func viewDidLoad() {
+    override func viewDidLoad()
+    {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
         self.title = self.navigationController?.title
     }
 
-    override func didReceiveMemoryWarning() {
+    override func didReceiveMemoryWarning()
+    {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }

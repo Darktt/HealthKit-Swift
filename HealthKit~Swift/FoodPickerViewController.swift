@@ -8,18 +8,21 @@
 
 import UIKit
 
-class FoodPickerViewController: UIViewController {
+class FoodPickerViewController: UIViewController
+{
 
     var selectedFootItem: FoodItem?
     
-    override func viewDidLoad() {
+    override func viewDidLoad()
+    {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
         self.title = "Pick Food"
     }
 
-    override func didReceiveMemoryWarning() {
+    override func didReceiveMemoryWarning()
+    {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }

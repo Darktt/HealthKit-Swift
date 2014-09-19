@@ -24,11 +24,12 @@ enum ProfileKeys : String {
 class ProfileViewController: UITableViewController
 {
     
-    let kProfileUnit = 0
-    let kProfileDetail = 1
+    private let kProfileUnit = 0
+    private let kProfileDetail = 1
     
     var healthStore: HKHealthStore?
-    var userProfiles: [ProfileKeys: [String]]?
+    
+    private var userProfiles: [ProfileKeys: [String]]?
     
     override func viewDidAppear(animated: Bool)
     {
@@ -56,6 +57,7 @@ class ProfileViewController: UITableViewController
             
             dispatch_async(dispatch_get_main_queue(), {
                 () -> Void in
+                
                 // Update the user interface based on the current user's health information.
                 self.updateUserAge()
                 self.updateUsersHeight()
@@ -87,7 +89,7 @@ class ProfileViewController: UITableViewController
 //MARK: - Private Method
 //MARK: HealthKit Permissions
     
-    func dataTypesToWrite() -> NSSet
+    private func dataTypesToWrite() -> NSSet
     {
         var dietaryCalorieEnergyType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)
         var activeEnergyBurnType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierActiveEnergyBurned)
@@ -99,7 +101,7 @@ class ProfileViewController: UITableViewController
         return writeDataTypes
     }
     
-    func dataTypesToRead() -> NSSet
+    private func dataTypesToRead() -> NSSet
     {
         var dietaryCalorieEnergyType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)
         var activeEnergyBurnType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierActiveEnergyBurned)
@@ -115,7 +117,7 @@ class ProfileViewController: UITableViewController
     
 //MARK: - Reading HealthKit Data
     
-    func updateUserAge() -> Void
+    private func updateUserAge() -> Void
     {
         var error: NSError?
         let dateOfBirth = self.healthStore?.dateOfBirthWithError(&error)
@@ -147,7 +149,7 @@ class ProfileViewController: UITableViewController
         self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
     }
     
-    func updateUsersHeight() -> Void
+    private func updateUsersHeight() -> Void
     {
         let setHeightInformationHandle: ((String) -> Void) = {
             (heightValue) -> Void in
@@ -211,7 +213,7 @@ class ProfileViewController: UITableViewController
         self.healthStore!.mostRecentQuantitySampleOfType(heightType, predicate: nil, completion: completion)
     }
     
-    func updateUsersWeight() -> Void
+    private func updateUsersWeight() -> Void
     {
         let setWeightInformationHandle: ((String) -> Void) = {
             (weightValue) -> Void in
@@ -275,7 +277,7 @@ class ProfileViewController: UITableViewController
         self.healthStore!.mostRecentQuantitySampleOfType(weightType, predicate: nil, completion: completion)
     }
     
-    func saveHeightIntoHealthStore(height:Double) -> Void
+    private func saveHeightIntoHealthStore(height:Double) -> Void
     {
         // Save the user's height into HealthKit.
         let inchUnit: HKUnit = HKUnit.inchUnit()
@@ -301,7 +303,7 @@ class ProfileViewController: UITableViewController
         self.healthStore!.saveObject(heightSample, withCompletion: completion)
     }
     
-    func saveWeightIntoHealthStore(weight:Double) -> Void
+    private func saveWeightIntoHealthStore(weight:Double) -> Void
     {
         // Save the user's weight into HealthKit.
         let poundUnit: HKUnit = HKUnit.poundUnit()
