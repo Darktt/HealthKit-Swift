@@ -21,7 +21,8 @@ enum ProfileKeys : String {
     case Weight = "weight"
 }
 
-class ProfileViewController: UITableViewController {
+class ProfileViewController: UITableViewController
+{
     
     let kProfileUnit = 0
     let kProfileDetail = 1
@@ -29,7 +30,8 @@ class ProfileViewController: UITableViewController {
     var healthStore: HKHealthStore?
     var userProfiles: [ProfileKeys: [String]]?
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(animated: Bool)
+    {
         super.viewDidAppear(animated)
         
         // Set up an HKHealthStore, asking the user for read/write permissions. The profile view controller is the
@@ -43,14 +45,17 @@ class ProfileViewController: UITableViewController {
         var writeDataTypes: NSSet = self.dataTypesToWrite()
         var readDataTypes: NSSet = self.dataTypesToRead()
         
-        var completion: ((Bool, NSError!) -> Void)! = { (success, error) -> Void in
+        var completion: ((Bool, NSError!) -> Void)! = {
+            (success, error) -> Void in
+            
             if !success {
                 println("You didn't allow HealthKit to access these read/write data types. In your app, try to handle this error gracefully when a user decides not to provide access. The error was: (error). If you're using a simulator, try it on a device.")
                 
                 return
             }
             
-            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            dispatch_async(dispatch_get_main_queue(), {
+                () -> Void in
                 // Update the user interface based on the current user's health information.
                 self.updateUserAge()
                 self.updateUsersHeight()
@@ -61,18 +66,20 @@ class ProfileViewController: UITableViewController {
         self.healthStore?.requestAuthorizationToShareTypes(writeDataTypes, readTypes: readDataTypes, completion: completion)
     }
     
-    override func viewDidLoad() {
+    override func viewDidLoad()
+    {
         super.viewDidLoad()
         
         // Do any additional setup after loading the view.
         self.title = "Your Profile"
         
-        self.userProfiles = [ProfileKeys.Age: [NSLocalizedString("Age (yrs)", comment: ""), "Not available"],
-                             ProfileKeys.Height: [NSLocalizedString("Height ()", comment: ""), "Not available"],
-                             ProfileKeys.Weight: [NSLocalizedString("Weight ()", comment: ""), "Not available"]]
+        self.userProfiles = [ProfileKeys.Age: [NSLocalizedString("Age (yrs)", comment: ""), NSLocalizedString("Not available", comment: "")],
+                             ProfileKeys.Height: [NSLocalizedString("Height ()", comment: ""), NSLocalizedString("Not available", comment: "")],
+                             ProfileKeys.Weight: [NSLocalizedString("Weight ()", comment: ""), NSLocalizedString("Not available", comment: "")]]
     }
 
-    override func didReceiveMemoryWarning() {
+    override func didReceiveMemoryWarning()
+    {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
@@ -80,7 +87,8 @@ class ProfileViewController: UITableViewController {
 //MARK: - Private Method
 //MARK: HealthKit Permissions
     
-    func dataTypesToWrite() -> NSSet {
+    func dataTypesToWrite() -> NSSet
+    {
         var dietaryCalorieEnergyType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)
         var activeEnergyBurnType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierActiveEnergyBurned)
         var heightType:  HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeight)
@@ -91,7 +99,8 @@ class ProfileViewController: UITableViewController {
         return writeDataTypes
     }
     
-    func dataTypesToRead() -> NSSet {
+    func dataTypesToRead() -> NSSet
+    {
         var dietaryCalorieEnergyType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)
         var activeEnergyBurnType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierActiveEnergyBurned)
         var heightType:  HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeight)
@@ -133,31 +142,205 @@ class ProfileViewController: UITableViewController {
             self.userProfiles = userProfiles
         }
         
+        // Reload table view (only age row)
         var indexPath: NSIndexPath = NSIndexPath(forRow: ProfileViewControllerTableViewIndex.Age.toRaw(), inSection: 0)
         self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
     }
     
-    func updateUsersHeight() -> Void {
-        var indexPath: NSIndexPath = NSIndexPath(forRow: ProfileViewControllerTableViewIndex.Height.toRaw(), inSection: 0)
-        self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
+    func updateUsersHeight() -> Void
+    {
+        let setHeightInformationHandle: ((String) -> Void) = {
+            (heightValue) -> Void in
+            
+            // Fetch user's default height unit in inches.
+            let lengthFormatter: NSLengthFormatter = NSLengthFormatter()
+            lengthFormatter.unitStyle = NSFormattingUnitStyle.Long
+            
+            let heightFormatterUnit: NSLengthFormatterUnit = .Inch
+            let heightUniString: String = lengthFormatter.unitStringFromValue(10, unit: heightFormatterUnit)
+            let localizedHeightUnitDescriptionFormat: String = NSLocalizedString("Height (%@)", comment: "");
+            
+            let heightUnitDescription: NSString = NSString(format: localizedHeightUnitDescriptionFormat, heightUniString);
+            
+            if var userProfiles = self.userProfiles {
+                var height: [String] = userProfiles[ProfileKeys.Height] as [String]!
+                height[self.kProfileUnit] = heightUnitDescription
+                height[self.kProfileDetail] = heightValue
+                
+                userProfiles[ProfileKeys.Height] = height
+                self.userProfiles = userProfiles
+            }
+            
+            // Reload table view (only height row)
+            let indexPath: NSIndexPath = NSIndexPath(forRow: ProfileViewControllerTableViewIndex.Height.toRaw(), inSection: 0)
+            self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
+        }
+        
+        let heightType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeight)
+        
+        // Query to get the user's latest height, if it exists.
+        let completion: HKCompletionHandle = {
+            (mostRecentQuantity, error) -> Void in
+            
+            if mostRecentQuantity == nil {
+                println("Either an error occured fetching the user's height information or none has been stored yet. In your app, try to handle this gracefully.")
+                
+                dispatch_async(dispatch_get_main_queue(), {
+                    () -> Void in
+                    let heightValue: String = NSLocalizedString("Not available", comment: "")
+                    
+                    setHeightInformationHandle(heightValue)
+                })
+                
+                return
+            }
+            
+            // Determine the height in the required unit.
+            let heightUnit: HKUnit = HKUnit.inchUnit()
+            let usersHeight: Double = mostRecentQuantity.doubleValueForUnit(heightUnit)
+            
+            // Update the user interface.
+            dispatch_async(dispatch_get_main_queue(), {
+                () -> Void in
+                let heightValue: String = NSNumberFormatter.localizedStringFromNumber(NSNumber(double: usersHeight), numberStyle: NSNumberFormatterStyle.NoStyle)
+                
+                setHeightInformationHandle(heightValue)
+            })
+        }
+        
+        self.healthStore!.mostRecentQuantitySampleOfType(heightType, predicate: nil, completion: completion)
     }
     
-    func updateUsersWeight() -> Void {
-        var indexPath: NSIndexPath = NSIndexPath(forRow: ProfileViewControllerTableViewIndex.Weight.toRaw(), inSection: 0)
-        self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
+    func updateUsersWeight() -> Void
+    {
+        let setWeightInformationHandle: ((String) -> Void) = {
+            (weightValue) -> Void in
+            
+            // Fetch user's default height unit in inches.
+            let massFormatter: NSMassFormatter = NSMassFormatter()
+            massFormatter.unitStyle = NSFormattingUnitStyle.Long
+            
+            let weightFormatterUnit: NSMassFormatterUnit = .Pound
+            let weightUniString: String = massFormatter.unitStringFromValue(10, unit: weightFormatterUnit)
+            let localizedHeightUnitDescriptionFormat: String = NSLocalizedString("Weight (%@)", comment: "");
+            
+            let weightUnitDescription: NSString = NSString(format: localizedHeightUnitDescriptionFormat, weightUniString);
+            
+            if var userProfiles = self.userProfiles {
+                var weight: [String] = userProfiles[ProfileKeys.Weight] as [String]!
+                weight[self.kProfileUnit] = weightUnitDescription
+                weight[self.kProfileDetail] = weightValue
+                
+                userProfiles[ProfileKeys.Weight] = weight
+                self.userProfiles = userProfiles
+            }
+            
+            // Reload table view (only height row)
+            let indexPath: NSIndexPath = NSIndexPath(forRow: ProfileViewControllerTableViewIndex.Weight.toRaw(), inSection: 0)
+            self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
+        }
+        
+        let weightType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBodyMass)
+        
+        // Query to get the user's latest weight, if it exists.
+        let completion: HKCompletionHandle = {
+            (mostRecentQuantity, error) -> Void in
+            
+            if mostRecentQuantity == nil {
+                println("Either an error occured fetching the user's height information or none has been stored yet. In your app, try to handle this gracefully.")
+                
+                dispatch_async(dispatch_get_main_queue(), {
+                    () -> Void in
+                    let weightValue: String = NSLocalizedString("Not available", comment: "")
+                    
+                    setWeightInformationHandle(weightValue)
+                })
+                
+                return
+            }
+            
+            // Determine the weight in the required unit.
+            let weightUnit: HKUnit = HKUnit.poundUnit()
+            let usersWeight: Double = mostRecentQuantity.doubleValueForUnit(weightUnit)
+            
+            // Update the user interface.
+            dispatch_async(dispatch_get_main_queue(), {
+                () -> Void in
+                let weightValue: String = NSNumberFormatter.localizedStringFromNumber(NSNumber(double: usersWeight), numberStyle: NSNumberFormatterStyle.NoStyle)
+                
+                setWeightInformationHandle(weightValue)
+            })
+        }
+        
+        self.healthStore!.mostRecentQuantitySampleOfType(weightType, predicate: nil, completion: completion)
+    }
+    
+    func saveHeightIntoHealthStore(height:Double) -> Void
+    {
+        // Save the user's height into HealthKit.
+        let inchUnit: HKUnit = HKUnit.inchUnit()
+        let heightQuantity: HKQuantity = HKQuantity(unit: inchUnit, doubleValue: height)
+        
+        let heightType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeight)
+        let nowDate: NSDate = NSDate()
+        
+        let heightSample: HKQuantitySample = HKQuantitySample(type: heightType, quantity: heightQuantity, startDate: nowDate, endDate: nowDate)
+        
+        let completion: ((Bool, NSError!) -> Void) = {
+            (success, error) -> Void in
+            
+            if !success {
+                println("An error occured saving the height sample (heightSample). In your app, try to handle this gracefully. The error was: (error).")
+                
+                abort()
+            }
+            
+            self.updateUsersHeight()
+        }
+        
+        self.healthStore!.saveObject(heightSample, withCompletion: completion)
+    }
+    
+    func saveWeightIntoHealthStore(weight:Double) -> Void
+    {
+        // Save the user's weight into HealthKit.
+        let poundUnit: HKUnit = HKUnit.poundUnit()
+        let weightQuantity: HKQuantity = HKQuantity(unit: poundUnit, doubleValue: weight)
+        
+        let weightType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBodyMass)
+        let nowDate: NSDate = NSDate()
+        
+        let weightSample: HKQuantitySample = HKQuantitySample(type: weightType, quantity: weightQuantity, startDate: nowDate, endDate: nowDate)
+        
+        let completion: ((Bool, NSError!) -> Void) = {
+            (success, error) -> Void in
+            
+            if !success {
+                println("An error occured saving the weight sample (weightSample). In your app, try to handle this gracefully. The error was: (error).")
+                
+                abort()
+            }
+            
+            self.updateUsersWeight()
+        }
+        
+        self.healthStore!.saveObject(weightSample, withCompletion: completion)
     }
     
 //MARK: - UITableView DataSource Methods
     
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSectionsInTableView(tableView: UITableView) -> Int
+    {
         return 1
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
+    {
         return 3
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
+    {
         let CellIdentifier: String = "CellIdentifier"
         
         var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier) as UITableViewCell?
@@ -193,11 +376,13 @@ class ProfileViewController: UITableViewController {
     
 //MARK: - UITableView Delegate Methods
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        var index: ProfileViewControllerTableViewIndex = ProfileViewControllerTableViewIndex.fromRaw(indexPath.row)!
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
+    {
+        let index: ProfileViewControllerTableViewIndex = ProfileViewControllerTableViewIndex.fromRaw(indexPath.row)!
         
         // We won't allow people to change their date of birth, so ignore selection of the age cell.
         if index == .Age {
+            tableView.deselectRowAtIndexPath(indexPath, animated: true)
             return
         }
         
@@ -208,21 +393,25 @@ class ProfileViewController: UITableViewController {
         if index == .Height {
             title = NSLocalizedString("Your Height", comment: "")
             
-            valueChangedHandler = { value -> Void in
-//                [self saveHeightIntoHealthStore:value];
+            valueChangedHandler = {
+                value -> Void in
+                
+                self.saveHeightIntoHealthStore(value)
             }
         }
         
         if index == .Weight {
             title = NSLocalizedString("Your Weight", comment: "")
             
-            valueChangedHandler = { value -> Void in
-//                [self saveWeightIntoHealthStore:value];
+            valueChangedHandler = {
+                value -> Void in
+                
+                self.saveWeightIntoHealthStore(value)
             }
         }
         
         // Create an alert controller to present.
-        var alertController: UIAlertController = UIAlertController(title: title, message: nil, preferredStyle: UIAlertControllerStyle.Alert)
+        let alertController: UIAlertController = UIAlertController(title: title, message: nil, preferredStyle: UIAlertControllerStyle.Alert)
         
         // Add the text field to let the user enter a numeric value.
         alertController.addTextFieldWithConfigurationHandler { (textField) -> Void in
@@ -231,12 +420,12 @@ class ProfileViewController: UITableViewController {
         }
         
         // Create the "OK" button.
-        var okTitle: String = NSLocalizedString("OK", comment: "")
-        var okAction: UIAlertAction = UIAlertAction(title: okTitle, style: UIAlertActionStyle.Default) { (action) -> Void in
-            var textField: UITextField = alertController.textFields?.first as UITextField
+        let okTitle: String = NSLocalizedString("OK", comment: "")
+        let okAction: UIAlertAction = UIAlertAction(title: okTitle, style: UIAlertActionStyle.Default) { (action) -> Void in
+            let textField: UITextField = alertController.textFields?.first as UITextField
             
-            var text: NSString = textField.text
-            var value: Double = text.doubleValue
+            let text: NSString = textField.text
+            let value: Double = text.doubleValue
             
             valueChangedHandler!(value)
             
@@ -246,8 +435,8 @@ class ProfileViewController: UITableViewController {
         alertController.addAction(okAction)
         
         // Create the "Cancel" button.
-        var cancelTitle: String = NSLocalizedString("Cancel", comment: "")
-        var cancelAction: UIAlertAction = UIAlertAction(title: cancelTitle, style: UIAlertActionStyle.Cancel) { (action) -> Void in
+        let cancelTitle: String = NSLocalizedString("Cancel", comment: "")
+        let cancelAction: UIAlertAction = UIAlertAction(title: cancelTitle, style: UIAlertActionStyle.Cancel) { (action) -> Void in
             tableView.deselectRowAtIndexPath(indexPath, animated: true)
         }
         

@@ -26,31 +26,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
         
-        var profile: ProfileViewController = ProfileViewController()
+        let profile: ProfileViewController = ProfileViewController()
         profile.healthStore = self.healthStore
         
-        var profileNavigtion: UINavigationController = UINavigationController(rootViewController: profile);
+        let profileNavigtion: UINavigationController = UINavigationController(rootViewController: profile);
         profileNavigtion.tabBarItem.image = UIImage(named: "profile")
         profileNavigtion.title = "Profile"
         
-        var journal: JournalViewController = JournalViewController()
+        let journal: JournalViewController = JournalViewController()
         journal.healthStore = self.healthStore
         
-        var journalNavigtion: UINavigationController = UINavigationController(rootViewController: journal);
+        let journalNavigtion: UINavigationController = UINavigationController(rootViewController: journal);
         journalNavigtion.tabBarItem.image = UIImage(named: "journal")
         journalNavigtion.title = "Journal"
         
-        var energy: EnergyViewController = EnergyViewController()
+        let energy: EnergyViewController = EnergyViewController()
         energy.healthStore = self.healthStore
         
-        var energyNavigtion: UINavigationController = UINavigationController(rootViewController: energy);
+        let energyNavigtion: UINavigationController = UINavigationController(rootViewController: energy);
         energyNavigtion.tabBarItem.image = UIImage(named: "energyburn")
         energyNavigtion.title = "Energy"
         
         self.tabBarController = UITabBarController()
         self.tabBarController!.viewControllers = [profileNavigtion, journalNavigtion, energyNavigtion]
         
-        var screen: CGRect = UIScreen.mainScreen().bounds
+        let screen: CGRect = UIScreen.mainScreen().bounds
         
         self.window = UIWindow(frame: screen)
         self.window!.backgroundColor = UIColor.blackColor()
