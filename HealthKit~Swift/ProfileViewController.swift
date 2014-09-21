@@ -50,7 +50,7 @@ class ProfileViewController: UITableViewController
             (success, error) -> Void in
             
             if !success {
-                println("You didn't allow HealthKit to access these read/write data types. In your app, try to handle this error gracefully when a user decides not to provide access. The error was: (error). If you're using a simulator, try it on a device.")
+                println("You didn't allow HealthKit to access these read/write data types. In your app, try to handle this error gracefully when a user decides not to provide access. The error was: \(error). If you're using a simulator, try it on a device.")
                 
                 return
             }
@@ -249,7 +249,7 @@ class ProfileViewController: UITableViewController
             (mostRecentQuantity, error) -> Void in
             
             if mostRecentQuantity == nil {
-                println("Either an error occured fetching the user's height information or none has been stored yet. In your app, try to handle this gracefully.")
+                println("Either an error occured fetching the user's weight information or none has been stored yet. In your app, try to handle this gracefully.")
                 
                 dispatch_async(dispatch_get_main_queue(), {
                     () -> Void in
@@ -292,7 +292,7 @@ class ProfileViewController: UITableViewController
             (success, error) -> Void in
             
             if !success {
-                println("An error occured saving the height sample (heightSample). In your app, try to handle this gracefully. The error was: (error).")
+                println("An error occured saving the height sample \(heightSample). In your app, try to handle this gracefully. The error was: \(error).")
                 
                 abort()
             }
@@ -318,7 +318,7 @@ class ProfileViewController: UITableViewController
             (success, error) -> Void in
             
             if !success {
-                println("An error occured saving the weight sample (weightSample). In your app, try to handle this gracefully. The error was: (error).")
+                println("An error occured saving the weight sample \(weightSample). In your app, try to handle this gracefully. The error was: \(error).")
                 
                 abort()
             }
