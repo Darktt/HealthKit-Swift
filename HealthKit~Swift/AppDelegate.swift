@@ -43,7 +43,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         journalNavigtion.tabBarItem.image = UIImage(named: "journal")
         journalNavigtion.title = "Journal"
         
-        let energy: EnergyViewController = EnergyViewController(style: UITableViewStyle.Plain)
+        let energy: EnergyViewController = EnergyViewController(style: UITableViewStyle.Grouped)
         energy.healthStore = self.healthStore
         
         let energyNavigtion: UINavigationController = UINavigationController(rootViewController: energy);

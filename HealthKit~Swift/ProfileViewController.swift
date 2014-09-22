@@ -363,7 +363,7 @@ class ProfileViewController: UITableViewController
             profilekey = .Weight
             
         default:
-            println()
+            break
         }
         
         if let profiles = self.userProfiles {
