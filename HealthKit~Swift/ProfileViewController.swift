@@ -128,7 +128,7 @@ class ProfileViewController: UITableViewController
             return
         }
         
-        var now: NSDate = NSDate.date()
+        var now: NSDate = NSDate()
         
         var ageComponents: NSDateComponents = NSCalendar.currentCalendar().components(NSCalendarUnit.YearCalendarUnit, fromDate: dateOfBirth!, toDate: now, options: NSCalendarOptions.WrapComponents)
         
@@ -145,7 +145,7 @@ class ProfileViewController: UITableViewController
         }
         
         // Reload table view (only age row)
-        var indexPath: NSIndexPath = NSIndexPath(forRow: ProfileViewControllerTableViewIndex.Age.toRaw(), inSection: 0)
+        var indexPath: NSIndexPath = NSIndexPath(forRow: ProfileViewControllerTableViewIndex.Age.rawValue, inSection: 0)
         self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
     }
     
@@ -174,7 +174,7 @@ class ProfileViewController: UITableViewController
             }
             
             // Reload table view (only height row)
-            let indexPath: NSIndexPath = NSIndexPath(forRow: ProfileViewControllerTableViewIndex.Height.toRaw(), inSection: 0)
+            let indexPath: NSIndexPath = NSIndexPath(forRow: ProfileViewControllerTableViewIndex.Height.rawValue, inSection: 0)
             self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
         }
         
@@ -238,7 +238,7 @@ class ProfileViewController: UITableViewController
             }
             
             // Reload table view (only height row)
-            let indexPath: NSIndexPath = NSIndexPath(forRow: ProfileViewControllerTableViewIndex.Weight.toRaw(), inSection: 0)
+            let indexPath: NSIndexPath = NSIndexPath(forRow: ProfileViewControllerTableViewIndex.Weight.rawValue, inSection: 0)
             self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
         }
         
@@ -369,8 +369,8 @@ class ProfileViewController: UITableViewController
         if let profiles = self.userProfiles {
             var profile: [String] = profiles[profilekey!] as [String]!
             
-            cell?.textLabel?.text = profile.first as String!
-            cell?.detailTextLabel?.text = profile.last as String!
+            cell!.textLabel.text = profile.first as String!
+            cell!.detailTextLabel!.text = profile.last as String!
         }
         
         return cell!
@@ -380,7 +380,7 @@ class ProfileViewController: UITableViewController
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
     {
-        let index: ProfileViewControllerTableViewIndex = ProfileViewControllerTableViewIndex.fromRaw(indexPath.row)!
+        let index: ProfileViewControllerTableViewIndex = ProfileViewControllerTableViewIndex(rawValue: indexPath.row)!
         
         // We won't allow people to change their date of birth, so ignore selection of the age cell.
         if index == .Age {

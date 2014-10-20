@@ -217,10 +217,10 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
         if let foodItems: [FoodItem] = self.foodItems {
             let foodItem = foodItems[indexPath.row]
             
-            cell.textLabel?.text = foodItem.name
+            cell.textLabel.text = foodItem.name
             
             let energyFormatter: NSEnergyFormatter = self.energyFormatter
-            cell.detailTextLabel?.text = energyFormatter.stringFromJoules(foodItem.joules)
+            cell.detailTextLabel!.text = energyFormatter.stringFromJoules(foodItem.joules)
         }
     }
     

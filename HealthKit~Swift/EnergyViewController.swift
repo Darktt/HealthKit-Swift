@@ -277,7 +277,7 @@ class EnergyViewController: UITableViewController
         let nowDate: NSDate = NSDate()
         
         let starDate: NSDate = calendar.startOfDayForDate(nowDate)
-        let endDate: NSDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: 1, toDate: starDate, options: NSCalendarOptions.allZeros)
+        let endDate: NSDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: 1, toDate: starDate, options: NSCalendarOptions.allZeros)!
         
         return (starDate, endDate)
     }
@@ -332,7 +332,7 @@ class EnergyViewController: UITableViewController
                 break
         }
         
-        cell!.textLabel!.text = title
+        cell!.textLabel.text = title
         cell!.detailTextLabel!.text = detailText!
         
         return cell!

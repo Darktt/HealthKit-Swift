@@ -19,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     
     let healthStore: HKHealthStore = HKHealthStore()
     
-    func application(application: UIApplication, willFinishLaunchingWithOptions launchOptions: [NSObject : AnyObject]?) -> Bool
+    func application(application: UIApplication, willFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool
     {
         
         return true
