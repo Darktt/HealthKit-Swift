@@ -332,7 +332,7 @@ class EnergyViewController: UITableViewController
                 break
         }
         
-        cell!.textLabel.text = title
+        cell!.textLabel!.text = title
         cell!.detailTextLabel!.text = detailText!
         
         return cell!

@@ -369,7 +369,7 @@ class ProfileViewController: UITableViewController
         if let profiles = self.userProfiles {
             var profile: [String] = profiles[profilekey!] as [String]!
             
-            cell!.textLabel.text = profile.first as String!
+            cell!.textLabel!.text = profile.first as String!
             cell!.detailTextLabel!.text = profile.last as String!
         }
         
