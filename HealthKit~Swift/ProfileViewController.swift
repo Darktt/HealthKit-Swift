@@ -43,8 +43,8 @@ class ProfileViewController: UITableViewController
             return
         }
         
-        var writeDataTypes: NSSet = self.dataTypesToWrite()
-        var readDataTypes: NSSet = self.dataTypesToRead()
+        var writeDataTypes: Set<NSObject> = self.dataTypesToWrite() as Set<NSObject>
+        var readDataTypes: Set<NSObject> = self.dataTypesToRead() as Set<NSObject>
         
         var completion: ((Bool, NSError!) -> Void)! = {
             (success, error) -> Void in
@@ -130,7 +130,7 @@ class ProfileViewController: UITableViewController
         
         var now: NSDate = NSDate()
         
-        var ageComponents: NSDateComponents = NSCalendar.currentCalendar().components(NSCalendarUnit.YearCalendarUnit, fromDate: dateOfBirth!, toDate: now, options: NSCalendarOptions.WrapComponents)
+        var ageComponents: NSDateComponents = NSCalendar.currentCalendar().components(.CalendarUnitYear, fromDate: dateOfBirth!, toDate: now, options: .WrapComponents)
         
         var userAge: Int = ageComponents.year
         
@@ -166,8 +166,8 @@ class ProfileViewController: UITableViewController
             
             if var userProfiles = self.userProfiles {
                 var height: [String] = userProfiles[ProfileKeys.Height] as [String]!
-                height[self.kProfileUnit] = heightUnitDescription
-                height[self.kProfileDetail] = heightValue
+                height[self.kProfileUnit] = heightUnitDescription as String
+                height[self.kProfileDetail] = heightValue as String
                 
                 userProfiles[ProfileKeys.Height] = height
                 self.userProfiles = userProfiles
@@ -230,7 +230,7 @@ class ProfileViewController: UITableViewController
             
             if var userProfiles = self.userProfiles {
                 var weight: [String] = userProfiles[ProfileKeys.Weight] as [String]!
-                weight[self.kProfileUnit] = weightUnitDescription
+                weight[self.kProfileUnit] = weightUnitDescription as String
                 weight[self.kProfileDetail] = weightValue
                 
                 userProfiles[ProfileKeys.Weight] = weight
@@ -345,7 +345,7 @@ class ProfileViewController: UITableViewController
     {
         let CellIdentifier: String = "CellIdentifier"
         
-        var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier) as UITableViewCell?
+        var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier) as? UITableViewCell
         if cell == nil {
             cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: CellIdentifier)
         }
@@ -424,7 +424,7 @@ class ProfileViewController: UITableViewController
         // Create the "OK" button.
         let okTitle: String = NSLocalizedString("OK", comment: "")
         let okAction: UIAlertAction = UIAlertAction(title: okTitle, style: UIAlertActionStyle.Default) { (action) -> Void in
-            let textField: UITextField = alertController.textFields?.first as UITextField
+            let textField: UITextField = alertController.textFields?.first as! UITextField
             
             let text: NSString = textField.text
             let value: Double = text.doubleValue

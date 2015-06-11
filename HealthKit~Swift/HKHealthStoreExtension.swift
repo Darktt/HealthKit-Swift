@@ -9,7 +9,7 @@
 import Foundation
 import HealthKit
 
-typealias HKCompletionHandle = ((HKQuantity!, NSError!) -> Void!)
+typealias HKCompletionHandle = ((HKQuantity!, NSError!) -> Void)
 
 extension HKHealthStore {
     
@@ -43,7 +43,7 @@ extension HKHealthStore {
             if completion != nil {
                 
                 // If quantity isn't in the database, return nil in the completion block.
-                var quantitySample: HKQuantitySample? = results.last as HKQuantitySample?
+                var quantitySample: HKQuantitySample? = results.last as? HKQuantitySample
                 var quantity: HKQuantity? = quantitySample?.quantity
                 
                 completion(quantity, error)

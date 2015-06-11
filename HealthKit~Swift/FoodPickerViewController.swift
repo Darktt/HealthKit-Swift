@@ -75,7 +75,7 @@ class FoodPickerViewController: UITableViewController
     {
         let CellIdentifier: String = "CellIdentifier"
         
-        var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier) as UITableViewCell?
+        var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier) as? UITableViewCell
         if cell == nil {
             cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: CellIdentifier)
         }
@@ -97,7 +97,7 @@ class FoodPickerViewController: UITableViewController
         
         let foodItem: FoodItem = self.foodItems[indexPath.row]
         
-        if self.delegate? != nil {
+        if self.delegate != nil {
             self.delegate?.foodPicker!(self, didSelectedFoodItem: foodItem)
         }
     }

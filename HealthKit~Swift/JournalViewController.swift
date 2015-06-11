@@ -104,7 +104,7 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
                 for foodCorrelation in results {
                     // Create an FoodItem instance that contains the information we care about that's
                     // stored in the food correlation.
-                    let foodItem: FoodItem = self.foodItemFromFoodCorrelation(foodCorrelation as HKCorrelation)
+                    let foodItem: FoodItem = self.foodItemFromFoodCorrelation(foodCorrelation as! HKCorrelation)
                     
                     self.foodItems!.append(foodItem)
                 }
@@ -119,20 +119,20 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
     private func foodItemFromFoodCorrelation(foodCorrelation: HKCorrelation) -> FoodItem
     {
         // Fetch the name fo the food.
-        let foodName = foodCorrelation.metadata[HKMetadataKeyFoodType] as NSString?
+        let foodName = foodCorrelation.metadata[HKMetadataKeyFoodType] as? NSString
         
         // Fetch the total energy from the food.
         let energyConsumedType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)
         let energyConsumedSamples: NSSet = foodCorrelation.objectsForType(energyConsumedType)
         
         // Note that we only have one energy consumed sample correlation (for Fit specifically).
-        let energyConsumedSample: HKQuantitySample = energyConsumedSamples.anyObject() as HKQuantitySample!
+        let energyConsumedSample: HKQuantitySample = energyConsumedSamples.anyObject() as! HKQuantitySample
         
         let energyQuantityConsumed: HKQuantity = energyConsumedSample.quantity
         
         let joules: Double = energyQuantityConsumed.doubleValueForUnit(HKUnit.jouleUnit())
         
-        return FoodItem.foodItem(foodName as String, joules: joules)
+        return FoodItem.foodItem(foodName as! String, joules: joules)
     }
     
     //MARK: - Writing HealthKit Data
@@ -172,10 +172,10 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
         let energyQuantityConsumed: HKQuantity = HKQuantity(unit: HKUnit.jouleUnit(), doubleValue: foodItem.joules)
         let energyConsumedType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)
         let energyConsumedSample: HKQuantitySample = HKQuantitySample(type: energyConsumedType, quantity: energyQuantityConsumed, startDate: nowDate, endDate: nowDate)
-        let energyConsumedSamples: NSSet = NSSet(object: energyConsumedSample)
+        let energyConsumedSamples: Set<NSObject> = [energyConsumedSample]
         
         let foodType: HKCorrelationType = HKCorrelationType.correlationTypeForIdentifier(HKCorrelationTypeIdentifierFood)
-        let foodCorrelationMetadata: NSDictionary = [HKMetadataKeyFoodType: foodItem.name]
+        let foodCorrelationMetadata: [NSObject: AnyObject] = [HKMetadataKeyFoodType: foodItem.name]
         
         let foodCorrelation: HKCorrelation = HKCorrelation(type: foodType, startDate: nowDate, endDate: nowDate, objects: energyConsumedSamples, metadata: foodCorrelationMetadata)
         
@@ -202,7 +202,7 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
     {
         let CellIdentifier: String = "CellIdentifier"
         
-        var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier) as UITableViewCell?
+        var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier) as? UITableViewCell
         if cell == nil {
             cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: CellIdentifier)
         }
