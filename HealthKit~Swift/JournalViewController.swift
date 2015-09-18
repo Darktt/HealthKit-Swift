@@ -77,13 +77,13 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
         let calendar: NSCalendar = NSCalendar.currentCalendar()
         let nowDate: NSDate = NSDate()
         
-        let componentsUnit = NSCalendarUnit.CalendarUnitYear | .CalendarUnitMonth | .CalendarUnitDay
+        let componentsUnit: NSCalendarUnit = [NSCalendarUnit.Year, .Month, .Day]
         let components: NSDateComponents = calendar.components(componentsUnit, fromDate: nowDate)
         
         let stareDate: NSDate? = calendar.dateFromComponents(components)
-        let endDate: NSDate? = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: 1, toDate: stareDate!, options: nil)
+        let endDate: NSDate? = calendar.dateByAddingUnit(NSCalendarUnit.Day, value: 1, toDate: stareDate!, options: [])
         
-        let foodType: HKCorrelationType = HKObjectType.correlationTypeForIdentifier(HKCorrelationTypeIdentifierFood)
+        let foodType: HKCorrelationType = HKObjectType.correlationTypeForIdentifier(HKCorrelationTypeIdentifierFood)!
         
         let predicate: NSPredicate = HKQuery.predicateForSamplesWithStartDate(stareDate, endDate: endDate, options: HKQueryOptions.None)
         let limit: Int = Int(HKObjectQueryNoLimit)
@@ -92,7 +92,7 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
             (query, results, error) -> Void in
             
             if results == nil {
-                println("An error occured fetching the user's tracked food. In your app, try to handle this gracefully. The error was: \(error).")
+                print("An error occured fetching the user's tracked food. In your app, try to handle this gracefully. The error was: \(error).")
                 abort()
             }
             
@@ -101,7 +101,7 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
                 
                 self.foodItems!.removeAll(keepCapacity: false)
                 
-                for foodCorrelation in results {
+                for foodCorrelation in results! {
                     // Create an FoodItem instance that contains the information we care about that's
                     // stored in the food correlation.
                     let foodItem: FoodItem = self.foodItemFromFoodCorrelation(foodCorrelation as! HKCorrelation)
@@ -119,10 +119,10 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
     private func foodItemFromFoodCorrelation(foodCorrelation: HKCorrelation) -> FoodItem
     {
         // Fetch the name fo the food.
-        let foodName = foodCorrelation.metadata[HKMetadataKeyFoodType] as? NSString
+        let foodName = foodCorrelation.metadata![HKMetadataKeyFoodType] as? NSString
         
         // Fetch the total energy from the food.
-        let energyConsumedType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)
+        let energyConsumedType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)!
         let energyConsumedSamples: NSSet = foodCorrelation.objectsForType(energyConsumedType)
         
         // Note that we only have one energy consumed sample correlation (for Fit specifically).
@@ -142,14 +142,14 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
         // Create a new food correlation for the given food item.
         let foodCorrelationForFoodItem: HKCorrelation = self.foodCorrelationForFoodItem(foodItem)
         
-        let completion: (Bool, NSError!) -> Void = {
+        let completion: (Bool, NSError?) -> Void = {
             (success, error) -> Void in
             
             dispatch_async(dispatch_get_main_queue(), {
                 () -> Void in
                 
                 if !success {
-                    println("An error occured saving the food %@. In your app, try to handle this gracefully. The error was: \(error)")
+                    print("An error occured saving the food %@. In your app, try to handle this gracefully. The error was: \(error)")
                     
                     return
                 }
@@ -170,12 +170,12 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
         let nowDate: NSDate = NSDate()
         
         let energyQuantityConsumed: HKQuantity = HKQuantity(unit: HKUnit.jouleUnit(), doubleValue: foodItem.joules)
-        let energyConsumedType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)
+        let energyConsumedType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)!
         let energyConsumedSample: HKQuantitySample = HKQuantitySample(type: energyConsumedType, quantity: energyQuantityConsumed, startDate: nowDate, endDate: nowDate)
-        let energyConsumedSamples: Set<NSObject> = [energyConsumedSample]
+        let energyConsumedSamples: Set<HKSample> = [energyConsumedSample]
         
-        let foodType: HKCorrelationType = HKCorrelationType.correlationTypeForIdentifier(HKCorrelationTypeIdentifierFood)
-        let foodCorrelationMetadata: [NSObject: AnyObject] = [HKMetadataKeyFoodType: foodItem.name]
+        let foodType: HKCorrelationType = HKCorrelationType.correlationTypeForIdentifier(HKCorrelationTypeIdentifierFood)!
+        let foodCorrelationMetadata: [String: AnyObject] = [HKMetadataKeyFoodType: foodItem.name]
         
         let foodCorrelation: HKCorrelation = HKCorrelation(type: foodType, startDate: nowDate, endDate: nowDate, objects: energyConsumedSamples, metadata: foodCorrelationMetadata)
         
@@ -202,7 +202,7 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
     {
         let CellIdentifier: String = "CellIdentifier"
         
-        var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier) as? UITableViewCell
+        var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier)
         if cell == nil {
             cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: CellIdentifier)
         }
