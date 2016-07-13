@@ -10,7 +10,7 @@ import UIKit
 
 @objc protocol FoodPickerViewControllerDelegate: NSObjectProtocol
 {
-    optional func foodPicker(foodPicker: FoodPickerViewController, didSelectedFoodItem foodItem: FoodItem) -> Void
+    @objc optional func foodPicker(_ foodPicker: FoodPickerViewController, didSelectedFoodItem foodItem: FoodItem) -> Void
 }
 
 class FoodPickerViewController: UITableViewController
@@ -34,11 +34,11 @@ class FoodPickerViewController: UITableViewController
         }
     }
     
-    private var energyFormatter: NSEnergyFormatter {
+    private var energyFormatter: EnergyFormatter {
         get {
-            let energyFormatter: NSEnergyFormatter = NSEnergyFormatter()
-            energyFormatter.unitStyle = NSFormattingUnitStyle.Long
-            energyFormatter.forFoodEnergyUse = true
+            let energyFormatter: EnergyFormatter = EnergyFormatter()
+            energyFormatter.unitStyle = Formatter.UnitStyle.long
+            energyFormatter.isForFoodEnergyUse = true
             energyFormatter.numberFormatter.maximumFractionDigits = 2
             
             return energyFormatter
@@ -61,41 +61,41 @@ class FoodPickerViewController: UITableViewController
     
     //MARK: - UITableView DataSource Methods
     
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int
+    override func numberOfSections(in tableView: UITableView) -> Int
     {
         return 1
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
         return self.foodItems.count
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
     {
         let CellIdentifier: String = "CellIdentifier"
         
-        var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier)
+        var cell: UITableViewCell? = tableView.dequeueReusableCell(withIdentifier: CellIdentifier)
         if cell == nil {
-            cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: CellIdentifier)
+            cell = UITableViewCell(style: UITableViewCellStyle.value1, reuseIdentifier: CellIdentifier)
         }
         
-        let foodItem: FoodItem = self.foodItems[indexPath.row]
+        let foodItem: FoodItem = self.foodItems[(indexPath as NSIndexPath).row]
         cell!.textLabel!.text = foodItem.name
         
-        let energyFormatter: NSEnergyFormatter = self.energyFormatter
-        cell!.detailTextLabel!.text = energyFormatter.stringFromJoules(foodItem.joules)
+        let energyFormatter: EnergyFormatter = self.energyFormatter
+        cell!.detailTextLabel!.text = energyFormatter.string(fromJoules: foodItem.joules)
         
         return cell!
     }
     
     //MARK: - UITableView Delegate Methods
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
     {
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        tableView.deselectRow(at: indexPath, animated: true)
         
-        let foodItem: FoodItem = self.foodItems[indexPath.row]
+        let foodItem: FoodItem = self.foodItems[(indexPath as NSIndexPath).row]
         
         if self.delegate != nil {
             self.delegate?.foodPicker!(self, didSelectedFoodItem: foodItem)

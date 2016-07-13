@@ -9,11 +9,11 @@
 import Foundation
 import HealthKit
 
-typealias HKCompletionHandle = ((HKQuantity!, NSError!) -> Void)
+typealias HKCompletionHandle = ((HKQuantity?, NSError?) -> Void)
 
 extension HKHealthStore {
     
-    func getClassName(obj : AnyObject) -> String
+    func getClassName(_ obj : AnyObject) -> String
     {
         let objectClass : AnyClass! = object_getClass(obj)
         let className = objectClass.description()
@@ -21,12 +21,12 @@ extension HKHealthStore {
         return className
     }
     
-    func mostRecentQuantitySampleOfType(quantityType: HKQuantityType,
-                                                predicate: NSPredicate!,
+    func mostRecentQuantitySampleOfType(_ quantityType: HKQuantityType,
+                                                predicate: Predicate!,
                                                completion: HKCompletionHandle!
                                             ) -> Void
     {
-        let timeSortDescript: NSSortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
+        let timeSortDescript: SortDescriptor = SortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
         
         // Since we are interested in retrieving the user's latest sample, we sort the samples in descending order, and set the limit to 1. We are not filtering the data, and so the predicate is set to nil.
         let query: HKSampleQuery = HKSampleQuery(sampleType: quantityType, predicate: nil, limit: 1, sortDescriptors: [timeSortDescript]) {
@@ -50,7 +50,7 @@ extension HKHealthStore {
             }
         }
         
-        self.executeQuery(query)
+        self.execute(query)
     }
     
 }

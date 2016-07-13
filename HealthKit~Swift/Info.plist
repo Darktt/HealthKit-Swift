@@ -29,6 +29,10 @@
 		<string>armv7</string>
 		<string>healthkit</string>
 	</array>
+	<key>NSHealthShareUsageDescription</key>
+	<string>EDIT THIS &lt;&lt;HealthKit Share Usage Description&gt;&gt;</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>EDIT THIS &lt;&lt;HealthKit Update Usage Description&gt;&gt;</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
