@@ -16,25 +16,25 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
     
     private var foodItems: [FoodItem]?
     
-    private var energyFormatter: EnergyFormatter {
+    private var energyFormatter: NSEnergyFormatter {
         get {
-            let energyFormatter: EnergyFormatter = EnergyFormatter()
-            energyFormatter.unitStyle = Formatter.UnitStyle.long
-            energyFormatter.isForFoodEnergyUse = true
+            let energyFormatter: NSEnergyFormatter = NSEnergyFormatter()
+            energyFormatter.unitStyle = NSFormattingUnitStyle.Long
+            energyFormatter.forFoodEnergyUse = true
             energyFormatter.numberFormatter.maximumFractionDigits = 2
             
             return energyFormatter
         }
     }
     
-    override func viewDidAppear(_ animated: Bool)
+    override func viewDidAppear(animated: Bool)
     {
-        NotificationCenter.default.addObserver(self, selector: "updateJournal", name: NSNotification.Name.UIApplicationDidBecomeActive, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateJournal", name: UIApplicationDidBecomeActiveNotification, object: nil)
     }
     
-    override func viewDidDisappear(_ animated: Bool)
+    override func viewDidDisappear(animated: Bool)
     {
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIApplicationDidBecomeActive, object: nil)
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIApplicationDidBecomeActiveNotification, object: nil)
     }
     
     override func viewDidLoad()
@@ -46,7 +46,7 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
         
         self.foodItems = []
         
-        let addBarButton: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.add, target: self, action: "pickFood:");
+        let addBarButton: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Add, target: self, action: "pickFood:");
         
         self.navigationItem.rightBarButtonItem = addBarButton
         
@@ -61,9 +61,9 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
     
     //MARK: - Button Action
     
-    @IBAction func pickFood(_ sender: AnyObject)
+    @IBAction func pickFood(sender: AnyObject)
     {
-        let pickFoodViewController = FoodPickerViewController(style: UITableViewStyle.plain)
+        let pickFoodViewController = FoodPickerViewController(style: UITableViewStyle.Plain)
         pickFoodViewController.delegate = self
         
         self.navigationController?.pushViewController(pickFoodViewController, animated: true)
@@ -74,34 +74,34 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
     // Use for someone selector, can not be private.
     func updateJournal()
     {
-        let calendar: Calendar = Calendar.current
-        let nowDate: Date = Date()
+        let calendar: NSCalendar = NSCalendar.currentCalendar()
+        let nowDate: NSDate = NSDate()
         
-        let componentsUnit: Calendar.Unit = [Calendar.Unit.year, .month, .day]
-        let components: DateComponents = calendar.components(componentsUnit, from: nowDate)
+        let componentsUnit = NSCalendarUnit.CalendarUnitYear | .CalendarUnitMonth | .CalendarUnitDay
+        let components: NSDateComponents = calendar.components(componentsUnit, fromDate: nowDate)
         
-        let stareDate: Date? = calendar.date(from: components)
-        let endDate: Date? = calendar.date(byAdding: Calendar.Unit.day, value: 1, to: stareDate!, options: [])
+        let stareDate: NSDate? = calendar.dateFromComponents(components)
+        let endDate: NSDate? = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: 1, toDate: stareDate!, options: nil)
         
-        let foodType: HKCorrelationType = HKObjectType.correlationType(forIdentifier: HKCorrelationTypeIdentifier.food)!
+        let foodType: HKCorrelationType = HKObjectType.correlationTypeForIdentifier(HKCorrelationTypeIdentifierFood)
         
-        let predicate: Predicate = HKQuery.predicateForSamples(withStart: stareDate, end: endDate, options: HKQueryOptions())
+        let predicate: NSPredicate = HKQuery.predicateForSamplesWithStartDate(stareDate, endDate: endDate, options: HKQueryOptions.None)
         let limit: Int = Int(HKObjectQueryNoLimit)
         
         let query: HKSampleQuery = HKSampleQuery(sampleType: foodType, predicate: predicate, limit: limit, sortDescriptors: nil) {
             (query, results, error) -> Void in
             
             if results == nil {
-                print("An error occured fetching the user's tracked food. In your app, try to handle this gracefully. The error was: \(error).")
+                println("An error occured fetching the user's tracked food. In your app, try to handle this gracefully. The error was: \(error).")
                 abort()
             }
             
-            DispatchQueue.main.async(execute: {
+            dispatch_async(dispatch_get_main_queue(), {
                 () -> Void in
                 
-                self.foodItems!.removeAll(keepingCapacity: false)
+                self.foodItems!.removeAll(keepCapacity: false)
                 
-                for foodCorrelation in results! {
+                for foodCorrelation in results {
                     // Create an FoodItem instance that contains the information we care about that's
                     // stored in the food correlation.
                     let foodItem: FoodItem = self.foodItemFromFoodCorrelation(foodCorrelation as! HKCorrelation)
@@ -113,83 +113,83 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
             })
         }
         
-        self.healthStore!.execute(query)
+        self.healthStore!.executeQuery(query)
     }
     
-    private func foodItemFromFoodCorrelation(_ foodCorrelation: HKCorrelation) -> FoodItem
+    private func foodItemFromFoodCorrelation(foodCorrelation: HKCorrelation) -> FoodItem
     {
         // Fetch the name fo the food.
-        let foodName = foodCorrelation.metadata![HKMetadataKeyFoodType] as? NSString
+        let foodName = foodCorrelation.metadata[HKMetadataKeyFoodType] as? NSString
         
         // Fetch the total energy from the food.
-        let energyConsumedType: HKQuantityType = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.dietaryEnergyConsumed)!
-        let energyConsumedSamples: NSSet = foodCorrelation.objects(for: energyConsumedType)
+        let energyConsumedType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)
+        let energyConsumedSamples: NSSet = foodCorrelation.objectsForType(energyConsumedType)
         
         // Note that we only have one energy consumed sample correlation (for Fit specifically).
         let energyConsumedSample: HKQuantitySample = energyConsumedSamples.anyObject() as! HKQuantitySample
         
         let energyQuantityConsumed: HKQuantity = energyConsumedSample.quantity
         
-        let joules: Double = energyQuantityConsumed.doubleValue(for: HKUnit.joule())
+        let joules: Double = energyQuantityConsumed.doubleValueForUnit(HKUnit.jouleUnit())
         
         return FoodItem.foodItem(foodName as! String, joules: joules)
     }
     
     //MARK: - Writing HealthKit Data
     
-    private func addFoodItem(_ foodItem: FoodItem)
+    private func addFoodItem(foodItem: FoodItem)
     {
         // Create a new food correlation for the given food item.
         let foodCorrelationForFoodItem: HKCorrelation = self.foodCorrelationForFoodItem(foodItem)
         
-        let completion: (Bool, NSError?) -> Void = {
+        let completion: (Bool, NSError!) -> Void = {
             (success, error) -> Void in
             
-            DispatchQueue.main.async(execute: {
+            dispatch_async(dispatch_get_main_queue(), {
                 () -> Void in
                 
                 if !success {
-                    print("An error occured saving the food %@. In your app, try to handle this gracefully. The error was: \(error)")
+                    println("An error occured saving the food %@. In your app, try to handle this gracefully. The error was: \(error)")
                     
                     return
                 }
                 
-                self.foodItems!.insert(foodItem, at: 0)
+                self.foodItems!.insert(foodItem, atIndex: 0)
                 
-                let indexPathForInsertedFoodItem: IndexPath = IndexPath(row: 0, section: 0)
+                let indexPathForInsertedFoodItem: NSIndexPath = NSIndexPath(forRow: 0, inSection: 0)
                 
-                self.tableView.insertRows(at: [indexPathForInsertedFoodItem], with: UITableViewRowAnimation.none)
+                self.tableView.insertRowsAtIndexPaths([indexPathForInsertedFoodItem], withRowAnimation: UITableViewRowAnimation.None)
             })
         }
         
-        self.healthStore!.save(foodCorrelationForFoodItem, withCompletion: completion)
+        self.healthStore!.saveObject(foodCorrelationForFoodItem, withCompletion: completion)
     }
     
-    private func foodCorrelationForFoodItem(_ foodItem: FoodItem) -> HKCorrelation
+    private func foodCorrelationForFoodItem(foodItem: FoodItem) -> HKCorrelation
     {
-        let nowDate: Date = Date()
+        let nowDate: NSDate = NSDate()
         
-        let energyQuantityConsumed: HKQuantity = HKQuantity(unit: HKUnit.joule(), doubleValue: foodItem.joules)
-        let energyConsumedType: HKQuantityType = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.dietaryEnergyConsumed)!
-        let energyConsumedSample: HKQuantitySample = HKQuantitySample(type: energyConsumedType, quantity: energyQuantityConsumed, start: nowDate, end: nowDate)
-        let energyConsumedSamples: Set<HKSample> = [energyConsumedSample]
+        let energyQuantityConsumed: HKQuantity = HKQuantity(unit: HKUnit.jouleUnit(), doubleValue: foodItem.joules)
+        let energyConsumedType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)
+        let energyConsumedSample: HKQuantitySample = HKQuantitySample(type: energyConsumedType, quantity: energyQuantityConsumed, startDate: nowDate, endDate: nowDate)
+        let energyConsumedSamples: Set<NSObject> = [energyConsumedSample]
         
-        let foodType: HKCorrelationType = HKCorrelationType.correlationType(forIdentifier: HKCorrelationTypeIdentifier.food)!
-        let foodCorrelationMetadata: [String: AnyObject] = [HKMetadataKeyFoodType: foodItem.name]
+        let foodType: HKCorrelationType = HKCorrelationType.correlationTypeForIdentifier(HKCorrelationTypeIdentifierFood)
+        let foodCorrelationMetadata: [NSObject: AnyObject] = [HKMetadataKeyFoodType: foodItem.name]
         
-        let foodCorrelation: HKCorrelation = HKCorrelation(type: foodType, start: nowDate, end: nowDate, objects: energyConsumedSamples, metadata: foodCorrelationMetadata)
+        let foodCorrelation: HKCorrelation = HKCorrelation(type: foodType, startDate: nowDate, endDate: nowDate, objects: energyConsumedSamples, metadata: foodCorrelationMetadata)
         
         return foodCorrelation
     }
     
     //MARK: - UITableView DataSource Methods
     
-    override func numberOfSections(in tableView: UITableView) -> Int
+    override func numberOfSectionsInTableView(tableView: UITableView) -> Int
     {
         return 1
     }
     
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
+    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
         if self.foodItems == nil {
             return 0
@@ -198,13 +198,13 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
         return self.foodItems!.count
     }
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
+    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
         let CellIdentifier: String = "CellIdentifier"
         
-        var cell: UITableViewCell? = tableView.dequeueReusableCell(withIdentifier: CellIdentifier)
+        var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier) as? UITableViewCell
         if cell == nil {
-            cell = UITableViewCell(style: UITableViewCellStyle.value1, reuseIdentifier: CellIdentifier)
+            cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: CellIdentifier)
         }
         
         return cell!
@@ -212,28 +212,28 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
     
     //MARK: - UITableView Delegate Methods
     
-    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath)
+    override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath)
     {
         if let foodItems: [FoodItem] = self.foodItems {
-            let foodItem = foodItems[(indexPath as NSIndexPath).row]
+            let foodItem = foodItems[indexPath.row]
             
             cell.textLabel!.text = foodItem.name
             
-            let energyFormatter: EnergyFormatter = self.energyFormatter
-            cell.detailTextLabel!.text = energyFormatter.string(fromJoules: foodItem.joules)
+            let energyFormatter: NSEnergyFormatter = self.energyFormatter
+            cell.detailTextLabel!.text = energyFormatter.stringFromJoules(foodItem.joules)
         }
     }
     
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
     {
-        tableView.deselectRow(at: indexPath, animated: true)
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
     
     //MARK - FoodPickerViewController Delegate Method
     
-    func foodPicker(_ foodPicker: FoodPickerViewController, didSelectedFoodItem foodItem: FoodItem)
+    func foodPicker(foodPicker: FoodPickerViewController, didSelectedFoodItem foodItem: FoodItem)
     {
-        self.navigationController?.popViewController(animated: true)
+        self.navigationController?.popViewControllerAnimated(true)
         
         self.addFoodItem(foodItem)
     }

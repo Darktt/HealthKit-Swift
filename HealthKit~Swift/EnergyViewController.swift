@@ -37,29 +37,29 @@ class EnergyViewController: UITableViewController
         }
     }
     
-    private var energyFormatter: EnergyFormatter {
+    private var energyFormatter: NSEnergyFormatter {
         get {
-            let energyFormatter: EnergyFormatter = EnergyFormatter()
-            energyFormatter.unitStyle = Formatter.UnitStyle.long
-            energyFormatter.isForFoodEnergyUse = true
+            let energyFormatter: NSEnergyFormatter = NSEnergyFormatter()
+            energyFormatter.unitStyle = NSFormattingUnitStyle.Long
+            energyFormatter.forFoodEnergyUse = true
             energyFormatter.numberFormatter.maximumFractionDigits = 2
             
             return energyFormatter
         }
     }
     
-    override func viewWillAppear(_ animated: Bool) {
+    override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
         self.refreshStatistics()
         
-        NotificationCenter.default.addObserver(self, selector: "refreshStatistics", name: NSNotification.Name.UIApplicationDidBecomeActive, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "refreshStatistics", name: UIApplicationDidBecomeActiveNotification, object: nil)
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
+    override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
         
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIApplicationDidBecomeActive, object: nil)
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIApplicationDidBecomeActiveNotification, object: nil)
     }
     
     override func viewDidLoad()
@@ -70,7 +70,7 @@ class EnergyViewController: UITableViewController
         self.title = self.navigationController?.title
         
         self.refreshControl = UIRefreshControl()
-        self.refreshControl?.addTarget(self, action: "refreshStatistics", for: UIControlEvents.valueChanged)
+        self.refreshControl?.addTarget(self, action: "refreshStatistics", forControlEvents: UIControlEvents.ValueChanged)
     }
 
     override func didReceiveMemoryWarning()
@@ -85,8 +85,8 @@ class EnergyViewController: UITableViewController
     {
         self.refreshControl!.beginRefreshing()
         
-        let energyConsumedType: HKQuantityType = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.dietaryEnergyConsumed)!
-        let activeEnergyBurnType: HKQuantityType = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.activeEnergyBurned)!
+        let energyConsumedType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)
+        let activeEnergyBurnType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierActiveEnergyBurned)
         
         // First, fetch the sum of energy consumed samples from HealthKit. Populate this by creating your
         // own food logging app or using the food journal view controller.
@@ -99,20 +99,20 @@ class EnergyViewController: UITableViewController
                 (activeEnergyBurned, error) -> Void in
                 
                 // Last, calculate the user's basal energy burn so far today.
-                let completion: ((HKQuantity?, NSError?) -> Void) = {
+                var completion: ((HKQuantity?, NSError?) -> Void) = {
                     (basalEnergyBurn, error) -> Void in
                     
                     if basalEnergyBurn == nil {
-                        print("An error occurred trying to compute the basal energy burn. In your app, handle this gracefully. Error: \(error)")
+                        println("An error occurred trying to compute the basal energy burn. In your app, handle this gracefully. Error: \(error)")
                     }
                     
                     // Update the UI with all of the fetched values.
-                    DispatchQueue.main.async(execute: {
+                    dispatch_async(dispatch_get_main_queue(), {
                         () -> Void in
                         
                         self.energyStore.activeEnergyBurned = activeEnergyBurned
                         
-                        self.energyStore.restingEnergyBurned = basalEnergyBurn?.doubleValue(for: HKUnit.joule()) ?? 0.0
+                        self.energyStore.restingEnergyBurned = basalEnergyBurn!.doubleValueForUnit(HKUnit.jouleUnit())
                         
                         self.energyStore.energyConsumed = totalJoulesConsumed
                         
@@ -126,39 +126,39 @@ class EnergyViewController: UITableViewController
                 
             }
             
-            self.fetchSumOfSamplesTodayForType(activeEnergyBurnType, unit: HKUnit.joule(), completion: completeSecondTime)
+            self.fetchSumOfSamplesTodayForType(activeEnergyBurnType, unit: HKUnit.jouleUnit(), completion: completeSecondTime)
         }
         
-        self.fetchSumOfSamplesTodayForType(energyConsumedType, unit: HKUnit.joule(), completion: completeFirstTime)
+        self.fetchSumOfSamplesTodayForType(energyConsumedType, unit: HKUnit.jouleUnit(), completion: completeFirstTime)
     }
     
-    private func fetchSumOfSamplesTodayForType(_ quantityType: HKQuantityType, unit: HKUnit, completion completionHandler: ((Double, NSError?) -> Void)?)
+    private func fetchSumOfSamplesTodayForType(quantityType: HKQuantityType, unit: HKUnit, completion completionHandler: ((Double, NSError?) -> Void)?)
     {
         let predicate = self.predicateForSamplesToday()
         
-        let query: HKStatisticsQuery = HKStatisticsQuery(quantityType: quantityType, quantitySamplePredicate: predicate, options: HKStatisticsOptions.cumulativeSum) {
+        let query: HKStatisticsQuery = HKStatisticsQuery(quantityType: quantityType, quantitySamplePredicate: predicate, options: HKStatisticsOptions.CumulativeSum) {
             (_query, result, error) -> Void in
             
-            let sum: HKQuantity? = result!.sumQuantity()
+            var sum: HKQuantity? = result.sumQuantity()
             
             if completionHandler != nil {
-                let value: Double = (sum != nil) ? sum!.doubleValue(for: unit) : 0
+                let value: Double = (sum != nil) ? sum!.doubleValueForUnit(unit) : 0
                 
                 completionHandler!(value, error)
             }
         }
         
-        self.healthStore!.execute(query)
+        self.healthStore!.executeQuery(query)
     }
     
     // Calculates the user's total basal (resting) energy burn based off of their height, weight, age,
     // and biological sex. If there is not enough information, return an error.
-    private func fetchTotalBasalBurn(_ completion: ((HKQuantity?, NSError?) -> Void))
+    private func fetchTotalBasalBurn(completion: ((HKQuantity?, NSError?) -> Void))
     {
-        let todayPredicate: Predicate = self.predicateForSamplesToday()
+        let todayPredicate: NSPredicate = self.predicateForSamplesToday()
         
-        let weightType: HKQuantityType = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bodyMass)!
-        let heightType: HKQuantityType = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.height)!
+        let weightType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBodyMass)
+        let heightType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeight)
         
         let queryWeigth: HKCompletionHandle = {
             (weight, error) -> Void in
@@ -178,30 +178,26 @@ class EnergyViewController: UITableViewController
                     return;
                 }
                 
-                var dateOfBirth: Date?
-                do {
-                    dateOfBirth = try self.healthStore!.dateOfBirth()
-                } catch let error as NSError {
+                var queryBirthDayError: NSError? = nil
+                var dateOfBirth: NSDate? = self.healthStore!.dateOfBirthWithError(&queryBirthDayError)
+                
+                if dateOfBirth == nil {
                     completion(nil, error)
                     
                     return;
-                } catch {
-                    fatalError()
                 }
                 
-                var biologicalSexObjet: HKBiologicalSexObject?
-                do {
-                    biologicalSexObjet = try self.healthStore!.biologicalSex()
-                } catch let error as NSError {
+                var queryBiologicalSexError: NSError? = nil
+                var biologicalSexObjet: HKBiologicalSexObject? = self.healthStore!.biologicalSexWithError(&queryBiologicalSexError)
+                
+                if biologicalSexObjet == nil {
                     completion(nil, error)
                     
                     return;
-                } catch {
-                    fatalError()
                 }
                 
                 // Once we have pulled all of the information without errors, calculate the user's total basal energy burn
-                let basalEnergyButn: HKQuantity? = self.calculateBasalBurnTodayFromWeight(weight, height: height, dateOfBirth: dateOfBirth!, biologicalSex: biologicalSexObjet!)
+                var basalEnergyButn: HKQuantity? = self.calculateBasalBurnTodayFromWeight(weight, height: height, dateOfBirth: dateOfBirth!, biologicalSex: biologicalSexObjet!)
                 
                 completion(basalEnergyButn, nil)
             }
@@ -212,7 +208,7 @@ class EnergyViewController: UITableViewController
         self.healthStore!.mostRecentQuantitySampleOfType(weightType, predicate: nil, completion: queryWeigth)
     }
     
-    private func calculateBasalBurnTodayFromWeight(_ weight: HKQuantity?, height: HKQuantity?, dateOfBirth: Date?, biologicalSex: HKBiologicalSexObject?) -> HKQuantity?
+    private func calculateBasalBurnTodayFromWeight(weight: HKQuantity?, height: HKQuantity?, dateOfBirth: NSDate?, biologicalSex: HKBiologicalSexObject?) -> HKQuantity?
     {
         // Only calculate Basal Metabolic Rate (BMR) if we have enough information about the user
         if (weight == nil) || (height == nil) || (dateOfBirth == nil) || (biologicalSex == nil) {
@@ -222,36 +218,36 @@ class EnergyViewController: UITableViewController
         // Note the difference between calling +unitFromString: vs creating a unit from a string with
         // a given prefix. Both of these are equally valid, however one may be more convenient for a given
         // use case.
-        let heightInCentimeters: Double = height!.doubleValue(for: HKUnit(from:"cm"))
-        let weightInKilograms: Double = weight!.doubleValue(for: HKUnit.gramUnit(with: HKMetricPrefix.kilo))
+        let heightInCentimeters: Double = height!.doubleValueForUnit(HKUnit(fromString:"cm"))
+        let weightInKilograms: Double = weight!.doubleValueForUnit(HKUnit.gramUnitWithMetricPrefix(HKMetricPrefix.Kilo))
         
-        let nowDate: Date = Date()
-        let ageComponents: DateComponents = Calendar.current.components(Calendar.Unit.year, from: dateOfBirth!, to: nowDate, options: Calendar.Options.wrapComponents)
-        let ageInYears: Int = ageComponents.year!
+        let nowDate: NSDate = NSDate()
+        let ageComponents: NSDateComponents = NSCalendar.currentCalendar().components(NSCalendarUnit.CalendarUnitYear, fromDate: dateOfBirth!, toDate: nowDate, options: NSCalendarOptions.WrapComponents)
+        let ageInYears: Int = ageComponents.year
         
         // BMR is calculated in kilocalories per day.
         let BMR: Double = self.calculateBMRFromWeight(weightInKilograms, height: heightInCentimeters, age: ageInYears, biologicalSex: biologicalSex!.biologicalSex)
         
         // Figure out how much of today has completed so we know how many kilocalories the user has burned.
-        let (startOfToday, endOfToday): (Date, Date) = self.datesFromToday()
+        let (startOfToday: NSDate, endOfToday: NSDate) = self.datesFromToday()
         
-        let secondsInDay: TimeInterval = endOfToday.timeIntervalSince(startOfToday)
-        let percentOfDayComplete: Double = nowDate.timeIntervalSince(startOfToday) / secondsInDay
+        let secondsInDay: NSTimeInterval = endOfToday.timeIntervalSinceDate(startOfToday)
+        let percentOfDayComplete: Double = nowDate.timeIntervalSinceDate(startOfToday) / secondsInDay
         
         let kilocaloriesBurned: Double = BMR * percentOfDayComplete
         
-        let basalBurn: HKQuantity = HKQuantity(unit: HKUnit.kilocalorie(), doubleValue: kilocaloriesBurned)
+        let basalBurn: HKQuantity = HKQuantity(unit: HKUnit.kilocalorieUnit(), doubleValue: kilocaloriesBurned)
         
         return basalBurn
     }
     
     //MARK: - Convenience
     
-    private func predicateForSamplesToday() -> Predicate
+    private func predicateForSamplesToday() -> NSPredicate
     {
-        let (starDate, endDate): (Date, Date) = self.datesFromToday()
+        let (starDate: NSDate, endDate: NSDate) = self.datesFromToday()
         
-        let predicate: Predicate = HKQuery.predicateForSamples(withStart: starDate, end: endDate, options: HKQueryOptions.strictStartDate)
+        let predicate: NSPredicate = HKQuery.predicateForSamplesWithStartDate(starDate, endDate: endDate, options: HKQueryOptions.StrictStartDate)
         
         return predicate
     }
@@ -259,11 +255,11 @@ class EnergyViewController: UITableViewController
     /// Returns BMR value in kilocalories per day. Note that there are different ways of calculating the
     /// BMR. In this example we chose an arbitrary function to calculate BMR based on weight, height, age,
     /// and biological sex.
-    private func calculateBMRFromWeight(_ weightInKilograms: Double, height heightInCentimeters: Double, age ageInYears: Int, biologicalSex: HKBiologicalSex) -> Double
+    private func calculateBMRFromWeight(weightInKilograms: Double, height heightInCentimeters: Double, age ageInYears: Int, biologicalSex: HKBiologicalSex) -> Double
     {
         var BMR: Double = 0
         
-        if biologicalSex == .male {
+        if biologicalSex == .Male {
             BMR = 66.0 + (13.8 * weightInKilograms) + (5.0 * heightInCentimeters) - (6.8 * Double(ageInYears))
             
             return BMR
@@ -274,52 +270,52 @@ class EnergyViewController: UITableViewController
         return BMR
     }
     
-    private func datesFromToday() -> (Date, Date)
+    private func datesFromToday() -> (NSDate, NSDate)
     {
-        let calendar: Calendar = Calendar.current
+        let calendar: NSCalendar = NSCalendar.currentCalendar()
         
-        let nowDate: Date = Date()
+        let nowDate: NSDate = NSDate()
         
-        let starDate: Date = calendar.startOfDay(for: nowDate)
-        let endDate: Date = calendar.date(byAdding: Calendar.Unit.day, value: 1, to: starDate, options: Calendar.Options())!
+        let starDate: NSDate = calendar.startOfDayForDate(nowDate)
+        let endDate: NSDate = calendar.dateByAddingUnit(NSCalendarUnit.CalendarUnitDay, value: 1, toDate: starDate, options: NSCalendarOptions.allZeros)!
         
         return (starDate, endDate)
     }
     
     //MARK: Convert Energy Formatter
     
-    private func stringFromJoules(_ joules: Double) -> String
+    private func stringFromJoules(joules: Double) -> String
     {
-        let stringOfJourle: String = self.energyFormatter.string(fromJoules: joules)
+        let stringOfJourle: String = self.energyFormatter.stringFromJoules(joules)
         
         return stringOfJourle
     }
     
     //MARK: - UITableView DataSource Methods
     
-    override func numberOfSections(in tableView: UITableView) -> Int
+    override func numberOfSectionsInTableView(tableView: UITableView) -> Int
     {
         return 1
     }
     
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
+    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
         return self.menu.count
     }
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
+    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
         let CellIdentifier: String = "CellIdentifier"
         
-        var cell: UITableViewCell? = tableView.dequeueReusableCell(withIdentifier: CellIdentifier)
+        var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier) as? UITableViewCell
         if cell == nil {
-            cell = UITableViewCell(style: UITableViewCellStyle.value1, reuseIdentifier: CellIdentifier)
+            cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: CellIdentifier)
         }
         
-        let title: String = self.menu[(indexPath as NSIndexPath).row]
+        let title: String = self.menu[indexPath.row]
         var detailText: String? = nil
         
-        switch (indexPath as NSIndexPath).row {
+        switch indexPath.row {
             case 0:
                 detailText = self.stringFromJoules(self.energyStore.restingEnergyBurned)
             
