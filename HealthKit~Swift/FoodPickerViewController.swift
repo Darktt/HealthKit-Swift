@@ -75,7 +75,7 @@ class FoodPickerViewController: UITableViewController
     {
         let CellIdentifier: String = "CellIdentifier"
         
-        var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier) as? UITableViewCell
+        var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier)
         if cell == nil {
             cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: CellIdentifier)
         }

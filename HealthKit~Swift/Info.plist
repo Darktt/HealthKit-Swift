@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.personalCompany.$(PRODUCT_NAME:rfc1034identifier)</string>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -22,6 +22,10 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSHealthShareUsageDescription</key>
+	<string>EDIT THIS &lt;&lt;HealthKit Share Usage Description&gt;&gt;</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>EDIT THIS &lt;&lt;HealthKit Update Usage Description&gt;&gt;</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
@@ -29,10 +33,6 @@
 		<string>armv7</string>
 		<string>healthkit</string>
 	</array>
-	<key>NSHealthShareUsageDescription</key>
-	<string>EDIT THIS &lt;&lt;HealthKit Share Usage Description&gt;&gt;</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>EDIT THIS &lt;&lt;HealthKit Update Usage Description&gt;&gt;</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

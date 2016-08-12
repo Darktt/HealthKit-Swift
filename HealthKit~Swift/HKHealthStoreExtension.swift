@@ -26,7 +26,7 @@ extension HKHealthStore {
                                                completion: HKCompletionHandle!
                                             ) -> Void
     {
-        var timeSortDescript: NSSortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
+        let timeSortDescript: NSSortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
         
         // Since we are interested in retrieving the user's latest sample, we sort the samples in descending order, and set the limit to 1. We are not filtering the data, and so the predicate is set to nil.
         let query: HKSampleQuery = HKSampleQuery(sampleType: quantityType, predicate: nil, limit: 1, sortDescriptors: [timeSortDescript]) {
@@ -43,8 +43,8 @@ extension HKHealthStore {
             if completion != nil {
                 
                 // If quantity isn't in the database, return nil in the completion block.
-                var quantitySample: HKQuantitySample? = results.last as? HKQuantitySample
-                var quantity: HKQuantity? = quantitySample?.quantity
+                let quantitySample: HKQuantitySample? = results!.last as? HKQuantitySample
+                let quantity: HKQuantity? = quantitySample?.quantity
                 
                 completion(quantity, error)
             }

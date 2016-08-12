@@ -43,14 +43,14 @@ class ProfileViewController: UITableViewController
             return
         }
         
-        var writeDataTypes: Set<NSObject> = self.dataTypesToWrite() as Set<NSObject>
-        var readDataTypes: Set<NSObject> = self.dataTypesToRead() as Set<NSObject>
+        let writeDataTypes: Set<HKSampleType> = self.dataTypesToWrite()
+        let readDataTypes: Set<HKObjectType> = self.dataTypesToRead()
         
-        var completion: ((Bool, NSError!) -> Void)! = {
+        let completion: ((Bool, NSError?) -> Void)! = {
             (success, error) -> Void in
             
             if !success {
-                println("You didn't allow HealthKit to access these read/write data types. In your app, try to handle this error gracefully when a user decides not to provide access. The error was: \(error). If you're using a simulator, try it on a device.")
+                print("You didn't allow HealthKit to access these read/write data types. In your app, try to handle this error gracefully when a user decides not to provide access. The error was: \(error). If you're using a simulator, try it on a device.")
                 
                 return
             }
@@ -89,28 +89,28 @@ class ProfileViewController: UITableViewController
 //MARK: - Private Method
 //MARK: HealthKit Permissions
     
-    private func dataTypesToWrite() -> NSSet
+    private func dataTypesToWrite() -> Set<HKSampleType>
     {
-        var dietaryCalorieEnergyType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)
-        var activeEnergyBurnType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierActiveEnergyBurned)
-        var heightType:  HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeight)
-        var weightType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBodyMass)
+        let dietaryCalorieEnergyType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)!
+        let activeEnergyBurnType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierActiveEnergyBurned)!
+        let heightType:  HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeight)!
+        let weightType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBodyMass)!
         
-        var writeDataTypes: NSSet = NSSet(objects: dietaryCalorieEnergyType, activeEnergyBurnType, heightType, weightType)
+        let writeDataTypes: Set<HKSampleType> = [dietaryCalorieEnergyType, activeEnergyBurnType, heightType, weightType]
         
         return writeDataTypes
     }
     
-    private func dataTypesToRead() -> NSSet
+    private func dataTypesToRead() -> Set<HKObjectType>
     {
-        var dietaryCalorieEnergyType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)
-        var activeEnergyBurnType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierActiveEnergyBurned)
-        var heightType:  HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeight)
-        var weightType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBodyMass)
-        var birthdayType: HKCharacteristicType = HKObjectType.characteristicTypeForIdentifier(HKCharacteristicTypeIdentifierDateOfBirth)
-        var biologicalSexType: HKCharacteristicType = HKObjectType.characteristicTypeForIdentifier(HKCharacteristicTypeIdentifierBiologicalSex)
+        let dietaryCalorieEnergyType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryEnergyConsumed)!
+        let activeEnergyBurnType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierActiveEnergyBurned)!
+        let heightType:  HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeight)!
+        let weightType: HKQuantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBodyMass)!
+        let birthdayType: HKCharacteristicType = HKObjectType.characteristicTypeForIdentifier(HKCharacteristicTypeIdentifierDateOfBirth)!
+        let biologicalSexType: HKCharacteristicType = HKObjectType.characteristicTypeForIdentifier(HKCharacteristicTypeIdentifierBiologicalSex)!
         
-        var readDataTypes: NSSet = NSSet(objects: dietaryCalorieEnergyType, activeEnergyBurnType, heightType, weightType, birthdayType, biologicalSexType)
+        let readDataTypes: Set<HKObjectType> = [dietaryCalorieEnergyType, activeEnergyBurnType, heightType, weightType, birthdayType, biologicalSexType]
         
         return readDataTypes
     }
@@ -119,22 +119,31 @@ class ProfileViewController: UITableViewController
     
     private func updateUserAge() -> Void
     {
-        var error: NSError?
-        let dateOfBirth = self.healthStore?.dateOfBirthWithError(&error)
+        let dateOfBirth: NSDate?
+        
+        do {
+            
+            dateOfBirth = try self.healthStore?.dateOfBirth()
+            
+        } catch _ as NSError {
+            
+            dateOfBirth = nil
+            
+        }
         
         if dateOfBirth == nil {
-            println("Either an error occured fetching the user's age information or none has been stored yet. In your app, try to handle this gracefully.")
+            print("Either an error occured fetching the user's age information or none has been stored yet. In your app, try to handle this gracefully.")
             
             return
         }
         
-        var now: NSDate = NSDate()
+        let now: NSDate = NSDate()
         
-        var ageComponents: NSDateComponents = NSCalendar.currentCalendar().components(.CalendarUnitYear, fromDate: dateOfBirth!, toDate: now, options: .WrapComponents)
+        let ageComponents: NSDateComponents = NSCalendar.currentCalendar().components(.Year, fromDate: dateOfBirth!, toDate: now, options: .WrapComponents)
         
-        var userAge: Int = ageComponents.year
+        let userAge: Int = ageComponents.year
         
-        var ageValue: String = NSNumberFormatter.localizedStringFromNumber(userAge, numberStyle: NSNumberFormatterStyle.NoStyle)
+        let ageValue: String = NSNumberFormatter.localizedStringFromNumber(userAge, numberStyle: NSNumberFormatterStyle.NoStyle)
         
         if var userProfiles = self.userProfiles {
             var age: [String] = userProfiles[ProfileKeys.Age] as [String]!
@@ -145,7 +154,7 @@ class ProfileViewController: UITableViewController
         }
         
         // Reload table view (only age row)
-        var indexPath: NSIndexPath = NSIndexPath(forRow: ProfileViewControllerTableViewIndex.Age.rawValue, inSection: 0)
+        let indexPath: NSIndexPath = NSIndexPath(forRow: ProfileViewControllerTableViewIndex.Age.rawValue, inSection: 0)
         self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
     }
     
@@ -178,14 +187,14 @@ class ProfileViewController: UITableViewController
             self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
         }
         
-        let heightType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeight)
+        let heightType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeight)!
         
         // Query to get the user's latest height, if it exists.
         let completion: HKCompletionHandle = {
             (mostRecentQuantity, error) -> Void in
             
             if mostRecentQuantity == nil {
-                println("Either an error occured fetching the user's height information or none has been stored yet. In your app, try to handle this gracefully.")
+                print("Either an error occured fetching the user's height information or none has been stored yet. In your app, try to handle this gracefully.")
                 
                 dispatch_async(dispatch_get_main_queue(), {
                     () -> Void in
@@ -242,14 +251,14 @@ class ProfileViewController: UITableViewController
             self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
         }
         
-        let weightType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBodyMass)
+        let weightType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBodyMass)!
         
         // Query to get the user's latest weight, if it exists.
         let completion: HKCompletionHandle = {
             (mostRecentQuantity, error) -> Void in
             
             if mostRecentQuantity == nil {
-                println("Either an error occured fetching the user's weight information or none has been stored yet. In your app, try to handle this gracefully.")
+                print("Either an error occured fetching the user's weight information or none has been stored yet. In your app, try to handle this gracefully.")
                 
                 dispatch_async(dispatch_get_main_queue(), {
                     () -> Void in
@@ -283,16 +292,16 @@ class ProfileViewController: UITableViewController
         let inchUnit: HKUnit = HKUnit.inchUnit()
         let heightQuantity: HKQuantity = HKQuantity(unit: inchUnit, doubleValue: height)
         
-        let heightType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeight)
+        let heightType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierHeight)!
         let nowDate: NSDate = NSDate()
         
         let heightSample: HKQuantitySample = HKQuantitySample(type: heightType, quantity: heightQuantity, startDate: nowDate, endDate: nowDate)
         
-        let completion: ((Bool, NSError!) -> Void) = {
+        let completion: ((Bool, NSError?) -> Void) = {
             (success, error) -> Void in
             
             if !success {
-                println("An error occured saving the height sample \(heightSample). In your app, try to handle this gracefully. The error was: \(error).")
+                print("An error occured saving the height sample \(heightSample). In your app, try to handle this gracefully. The error was: \(error).")
                 
                 abort()
             }
@@ -309,16 +318,16 @@ class ProfileViewController: UITableViewController
         let poundUnit: HKUnit = HKUnit.poundUnit()
         let weightQuantity: HKQuantity = HKQuantity(unit: poundUnit, doubleValue: weight)
         
-        let weightType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBodyMass)
+        let weightType: HKQuantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBodyMass)!
         let nowDate: NSDate = NSDate()
         
         let weightSample: HKQuantitySample = HKQuantitySample(type: weightType, quantity: weightQuantity, startDate: nowDate, endDate: nowDate)
         
-        let completion: ((Bool, NSError!) -> Void) = {
+        let completion: ((Bool, NSError?) -> Void) = {
             (success, error) -> Void in
             
             if !success {
-                println("An error occured saving the weight sample \(weightSample). In your app, try to handle this gracefully. The error was: \(error).")
+                print("An error occured saving the weight sample \(weightSample). In your app, try to handle this gracefully. The error was: \(error).")
                 
                 abort()
             }
@@ -345,7 +354,8 @@ class ProfileViewController: UITableViewController
     {
         let CellIdentifier: String = "CellIdentifier"
         
-        var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier) as? UITableViewCell
+        var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier)
+        
         if cell == nil {
             cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: CellIdentifier)
         }
@@ -367,7 +377,7 @@ class ProfileViewController: UITableViewController
         }
         
         if let profiles = self.userProfiles {
-            var profile: [String] = profiles[profilekey!] as [String]!
+            let profile: [String] = profiles[profilekey!] as [String]!
             
             cell!.textLabel!.text = profile.first as String!
             cell!.detailTextLabel!.text = profile.last as String!
@@ -424,9 +434,9 @@ class ProfileViewController: UITableViewController
         // Create the "OK" button.
         let okTitle: String = NSLocalizedString("OK", comment: "")
         let okAction: UIAlertAction = UIAlertAction(title: okTitle, style: UIAlertActionStyle.Default) { (action) -> Void in
-            let textField: UITextField = alertController.textFields?.first as! UITextField
+            let textField: UITextField = alertController.textFields!.first!
             
-            let text: NSString = textField.text
+            let text: NSString = textField.text!
             let value: Double = text.doubleValue
             
             valueChangedHandler!(value)

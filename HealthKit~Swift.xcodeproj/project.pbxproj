@@ -18,18 +18,7 @@
 		52FCCE9119C91B8700036F4C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52FCCE9019C91B8700036F4C /* AppDelegate.swift */; };
 		52FCCE9819C91B8800036F4C /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 52FCCE9719C91B8800036F4C /* Images.xcassets */; };
 		52FCCE9B19C91B8800036F4C /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 52FCCE9919C91B8800036F4C /* LaunchScreen.xib */; };
-		52FCCEA719C91B8800036F4C /* HealthKit_SwiftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52FCCEA619C91B8800036F4C /* HealthKit_SwiftTests.swift */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		52FCCEA119C91B8800036F4C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 52FCCE8319C91B8700036F4C /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 52FCCE8A19C91B8700036F4C;
-			remoteInfo = "HealthKit~Swift";
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		52210CE519C9575F0009C5FF /* HKHealthStoreExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HKHealthStoreExtension.swift; sourceTree = "<group>"; };
@@ -47,9 +36,6 @@
 		52FCCE9019C91B8700036F4C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		52FCCE9719C91B8800036F4C /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		52FCCE9A19C91B8800036F4C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
-		52FCCEA019C91B8800036F4C /* HealthKit~SwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "HealthKit~SwiftTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		52FCCEA519C91B8800036F4C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		52FCCEA619C91B8800036F4C /* HealthKit_SwiftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKit_SwiftTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,13 +44,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				52210CE919C957790009C5FF /* HealthKit.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		52FCCE9D19C91B8800036F4C /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -102,7 +81,6 @@
 			children = (
 				52210CE819C957790009C5FF /* HealthKit.framework */,
 				52FCCE8D19C91B8700036F4C /* HealthKit~Swift */,
-				52FCCEA319C91B8800036F4C /* HealthKit~SwiftTests */,
 				52FCCE8C19C91B8700036F4C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -111,7 +89,6 @@
 			isa = PBXGroup;
 			children = (
 				52FCCE8B19C91B8700036F4C /* HealthKit~Swift.app */,
-				52FCCEA019C91B8800036F4C /* HealthKit~SwiftTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -141,23 +118,6 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		52FCCEA319C91B8800036F4C /* HealthKit~SwiftTests */ = {
-			isa = PBXGroup;
-			children = (
-				52FCCEA619C91B8800036F4C /* HealthKit_SwiftTests.swift */,
-				52FCCEA419C91B8800036F4C /* Supporting Files */,
-			);
-			path = "HealthKit~SwiftTests";
-			sourceTree = "<group>";
-		};
-		52FCCEA419C91B8800036F4C /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				52FCCEA519C91B8800036F4C /* Info.plist */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -178,31 +138,14 @@
 			productReference = 52FCCE8B19C91B8700036F4C /* HealthKit~Swift.app */;
 			productType = "com.apple.product-type.application";
 		};
-		52FCCE9F19C91B8800036F4C /* HealthKit~SwiftTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 52FCCEAD19C91B8800036F4C /* Build configuration list for PBXNativeTarget "HealthKit~SwiftTests" */;
-			buildPhases = (
-				52FCCE9C19C91B8800036F4C /* Sources */,
-				52FCCE9D19C91B8800036F4C /* Frameworks */,
-				52FCCE9E19C91B8800036F4C /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				52FCCEA219C91B8800036F4C /* PBXTargetDependency */,
-			);
-			name = "HealthKit~SwiftTests";
-			productName = "HealthKit~SwiftTests";
-			productReference = 52FCCEA019C91B8800036F4C /* HealthKit~SwiftTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		52FCCE8319C91B8700036F4C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0600;
+				LastSwiftUpdateCheck = 0730;
+				LastUpgradeCheck = 0730;
 				ORGANIZATIONNAME = "Darktt Personal Company";
 				TargetAttributes = {
 					52FCCE8A19C91B8700036F4C = {
@@ -214,11 +157,6 @@
 								enabled = 1;
 							};
 						};
-					};
-					52FCCE9F19C91B8800036F4C = {
-						CreatedOnToolsVersion = 6.0;
-						LastSwiftMigration = 0800;
-						TestTargetID = 52FCCE8A19C91B8700036F4C;
 					};
 				};
 			};
@@ -236,7 +174,6 @@
 			projectRoot = "";
 			targets = (
 				52FCCE8A19C91B8700036F4C /* HealthKit~Swift */,
-				52FCCE9F19C91B8800036F4C /* HealthKit~SwiftTests */,
 			);
 		};
 /* End PBXProject section */
@@ -249,13 +186,6 @@
 				52FCCE9B19C91B8800036F4C /* LaunchScreen.xib in Resources */,
 				52210CFB19C970410009C5FF /* InfoPlist.strings in Resources */,
 				52FCCE9819C91B8800036F4C /* Images.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		52FCCE9E19C91B8800036F4C /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -276,23 +206,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		52FCCE9C19C91B8800036F4C /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				52FCCEA719C91B8800036F4C /* HealthKit_SwiftTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		52FCCEA219C91B8800036F4C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 52FCCE8A19C91B8700036F4C /* HealthKit~Swift */;
-			targetProxy = 52FCCEA119C91B8800036F4C /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		52210CF919C970410009C5FF /* InfoPlist.strings */ = {
@@ -335,6 +249,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -402,6 +317,7 @@
 				INFOPLIST_FILE = "HealthKit~Swift/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.personalCompany.HealthKit-Swift";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_VERSION = 3.0;
@@ -418,45 +334,10 @@
 				INFOPLIST_FILE = "HealthKit~Swift/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.personalCompany.HealthKit-Swift";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_VERSION = 3.0;
-			};
-			name = Release;
-		};
-		52FCCEAE19C91B8800036F4C /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = "HealthKit~SwiftTests/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HealthKit~Swift.app/HealthKit~Swift";
-			};
-			name = Debug;
-		};
-		52FCCEAF19C91B8800036F4C /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = "HealthKit~SwiftTests/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HealthKit~Swift.app/HealthKit~Swift";
 			};
 			name = Release;
 		};
@@ -477,15 +358,6 @@
 			buildConfigurations = (
 				52FCCEAB19C91B8800036F4C /* Debug */,
 				52FCCEAC19C91B8800036F4C /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		52FCCEAD19C91B8800036F4C /* Build configuration list for PBXNativeTarget "HealthKit~SwiftTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				52FCCEAE19C91B8800036F4C /* Debug */,
-				52FCCEAF19C91B8800036F4C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
