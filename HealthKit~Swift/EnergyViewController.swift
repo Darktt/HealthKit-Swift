@@ -15,6 +15,7 @@ class EnergyViewController: UITableViewController
     
     // Private class and variables
     private class Energy {
+        
         var activeEnergyBurned: Double = 0.0
         var restingEnergyBurned: Double = 0.0
         var energyConsumed: Double = 0.0
@@ -324,6 +325,7 @@ class EnergyViewController: UITableViewController
         var cell: UITableViewCell? = tableView.dequeueReusableCell(withIdentifier: CellIdentifier)
         if cell == nil {
             cell = UITableViewCell(style: UITableViewCellStyle.value1, reuseIdentifier: CellIdentifier)
+            cell!.selectionStyle = .none
         }
         
         let title: String = self.menu[indexPath.row]
