@@ -7,10 +7,12 @@
 //
 
 import UIKit
-
-@objc protocol FoodPickerViewControllerDelegate: NSObjectProtocol
+ 
+@objc
+protocol FoodPickerViewControllerDelegate: class
 {
-    optional func foodPicker(foodPicker: FoodPickerViewController, didSelectedFoodItem foodItem: FoodItem) -> Void
+    @objc 
+    optional func foodPicker(_ foodPicker: FoodPickerViewController, didSelectedFoodItem foodItem: FoodItem) -> Void
 }
 
 class FoodPickerViewController: UITableViewController
@@ -18,31 +20,30 @@ class FoodPickerViewController: UITableViewController
     var delegate: FoodPickerViewControllerDelegate?
     
     private var foodItems: [FoodItem] {
-        get {
-            var foodItems: [FoodItem] = [FoodItem.foodItem("Wheat Bagel", joules: 240000.0)]
-            foodItems.append(FoodItem.foodItem("Bran with Raisins", joules: 190000.0))
-            foodItems.append(FoodItem.foodItem("Regular Instant Coffee", joules: 1000.0))
-            foodItems.append(FoodItem.foodItem("Banana", joules: 439320.0))
-            foodItems.append(FoodItem.foodItem("Cranberry Bagel", joules: 416000.0))
-            foodItems.append(FoodItem.foodItem("Oatmeal", joules: 150000.0))
-            foodItems.append(FoodItem.foodItem("Fruits Salad", joules: 60000.0))
-            foodItems.append(FoodItem.foodItem("Fried Sea Bass", joules: 200000.0))
-            foodItems.append(FoodItem.foodItem("Chips", joules: 190000.0))
-            foodItems.append(FoodItem.foodItem("Chicken Taco", joules: 170000.0))
-            
-            return foodItems
-        }
+        
+        var foodItems = Array<FoodItem>() 
+        foodItems.append(FoodItem(name: "Wheat Bagel", joules: 240000.0))
+        foodItems.append(FoodItem(name: "Bran with Raisins", joules: 190000.0))
+        foodItems.append(FoodItem(name: "Regular Instant Coffee", joules: 1000.0))
+        foodItems.append(FoodItem(name: "Banana", joules: 439320.0))
+        foodItems.append(FoodItem(name: "Cranberry Bagel", joules: 416000.0))
+        foodItems.append(FoodItem(name: "Oatmeal", joules: 150000.0))
+        foodItems.append(FoodItem(name: "Fruits Salad", joules: 60000.0))
+        foodItems.append(FoodItem(name: "Fried Sea Bass", joules: 200000.0))
+        foodItems.append(FoodItem(name: "Chips", joules: 190000.0))
+        foodItems.append(FoodItem(name: "Chicken Taco", joules: 170000.0))
+        
+        return foodItems
     }
     
-    private var energyFormatter: NSEnergyFormatter {
-        get {
-            let energyFormatter: NSEnergyFormatter = NSEnergyFormatter()
-            energyFormatter.unitStyle = NSFormattingUnitStyle.Long
-            energyFormatter.forFoodEnergyUse = true
-            energyFormatter.numberFormatter.maximumFractionDigits = 2
-            
-            return energyFormatter
-        }
+    private var energyFormatter: EnergyFormatter {
+        
+        let energyFormatter = EnergyFormatter()
+        energyFormatter.unitStyle = Formatter.UnitStyle.long
+        energyFormatter.isForFoodEnergyUse = true
+        energyFormatter.numberFormatter.maximumFractionDigits = 2
+        
+        return energyFormatter
     }
     
     override func viewDidLoad()
@@ -61,44 +62,45 @@ class FoodPickerViewController: UITableViewController
     
     //MARK: - UITableView DataSource Methods
     
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int
+    override func numberOfSections(in tableView: UITableView) -> Int 
     {
         return 1
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
         return self.foodItems.count
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
     {
         let CellIdentifier: String = "CellIdentifier"
         
-        var cell: UITableViewCell? = tableView.dequeueReusableCellWithIdentifier(CellIdentifier)
+        var cell: UITableViewCell? = tableView.dequeueReusableCell(withIdentifier: CellIdentifier)
         if cell == nil {
-            cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: CellIdentifier)
+            cell = UITableViewCell(style: UITableViewCellStyle.value1, reuseIdentifier: CellIdentifier)
         }
         
         let foodItem: FoodItem = self.foodItems[indexPath.row]
         cell!.textLabel!.text = foodItem.name
         
-        let energyFormatter: NSEnergyFormatter = self.energyFormatter
-        cell!.detailTextLabel!.text = energyFormatter.stringFromJoules(foodItem.joules)
+        let energyFormatter: EnergyFormatter = self.energyFormatter
+        cell!.detailTextLabel!.text = energyFormatter.string(fromJoules: foodItem.joules)
         
         return cell!
     }
     
     //MARK: - UITableView Delegate Methods
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
     {
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        tableView.deselectRow(at: indexPath, animated: true)
         
         let foodItem: FoodItem = self.foodItems[indexPath.row]
         
-        if self.delegate != nil {
-            self.delegate?.foodPicker!(self, didSelectedFoodItem: foodItem)
+        if let delegate = self.delegate, let foodPicker = delegate.foodPicker {
+            
+            foodPicker(self, foodItem)
         }
     }
 }

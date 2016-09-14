@@ -10,21 +10,8 @@ import UIKit
 
 class FoodItem: NSObject
 {
-    var name: String {
-        get {
-            return _name!
-        }
-    }
-    
-    private var _name: String?
-    
-    var joules: Double {
-        get {
-            return _joules!
-        }
-    }
-    
-    private var _joules: Double?
+    private(set) var name: String
+    private(set) var joules: Double
     
     class func foodItem(name: String, joules: Double) -> FoodItem
     {
@@ -33,18 +20,21 @@ class FoodItem: NSObject
         return item
     }
     
-    init(name: String, joules: Double) {
-        super.init()
+    init(name: String, joules: Double) 
+    {
+        self.name = name
+        self.joules = joules
         
-        self._name = name
-        self._joules = joules
+        super.init()
     }
     
-    override func isEqual(object: AnyObject?) -> Bool {
-        if object!.isKindOfClass(object_getClass(FoodItem)) {
-            return (object!.joules == self.joules) && (object!.name == self.name)
+    override func isEqual(_ object: Any?) -> Bool 
+    {
+        guard let object = object as? FoodItem else {
+            
+            return false
         }
         
-        return false
+        return (object.joules == self.joules) && (object.name == self.name)
     }
 }
