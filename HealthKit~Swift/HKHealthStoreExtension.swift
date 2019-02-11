@@ -9,10 +9,13 @@
 import Foundation
 import HealthKit
 
-typealias HKCompletionHandle = ((HKQuantity?, Error?) -> Void)
+extension HKHealthStore
+{
+    public typealias CompletionHandler = ((HKQuantity?, Error?) -> Void)
+}
 
-extension HKHealthStore {
-    
+extension HKHealthStore
+{
     func getClassName(obj : AnyObject) -> String
     {
         let objectClass : AnyClass! = object_getClass(obj)
@@ -21,12 +24,12 @@ extension HKHealthStore {
         return className
     }
     
-    func mostRecentQuantitySample(ofType quantityType: HKQuantityType, predicate: NSPredicate? = nil, completion: HKCompletionHandle?)
+    func mostRecentQuantitySample(ofType quantityType: HKQuantityType, predicate: NSPredicate? = nil, completion: CompletionHandler? = nil)
     {
         let timeSortDescript: NSSortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
         
         // Since we are interested in retrieving the user's latest sample, we sort the samples in descending order, and set the limit to 1. We are not filtering the data, and so the predicate is set to nil.
-        let query: HKSampleQuery = HKSampleQuery(sampleType: quantityType, predicate: predicate, limit: 1, sortDescriptors: [timeSortDescript]) {
+        let resultsHandler: (HKSampleQuery, [HKSample]?, Error?) -> Void = {
             
             (query, results, error) -> Void in
             
@@ -39,7 +42,8 @@ extension HKHealthStore {
                 return
             }
             
-            if let completion = completion, let quantitySample: HKQuantitySample = results.last as? HKQuantitySample {
+            if let completion = completion,
+                let quantitySample: HKQuantitySample = results.last as? HKQuantitySample {
                 
                 // If quantity isn't in the database, return nil in the completion block.
                 let quantity: HKQuantity = quantitySample.quantity
@@ -48,7 +52,8 @@ extension HKHealthStore {
             }
         }
         
+        let query: HKSampleQuery = HKSampleQuery(sampleType: quantityType, predicate: predicate, limit: 1, sortDescriptors: [timeSortDescript], resultsHandler: resultsHandler)
+        
         self.execute(query)
     }
-    
 }

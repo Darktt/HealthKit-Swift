@@ -9,14 +9,15 @@
 import UIKit
 import HealthKit
 
-class JournalViewController: UITableViewController, FoodPickerViewControllerDelegate
+class JournalViewController: UITableViewController
 {
-
+    // MARK: - Properties -
+    
     var healthStore: HKHealthStore?
     
-    private var foodItems: Array<FoodItem>?
+    fileprivate var foodItems: Array<FoodItem>?
     
-    private var energyFormatter: EnergyFormatter {
+    fileprivate lazy var energyFormatter: EnergyFormatter = {
         
         let energyFormatter = EnergyFormatter()
         energyFormatter.unitStyle = Formatter.UnitStyle.long
@@ -24,16 +25,18 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
         energyFormatter.numberFormatter.maximumFractionDigits = 2
         
         return energyFormatter
-    }
+    }()
+    
+    // MARK: - Methods -
     
     override func viewDidAppear(_ animated: Bool)
     {
-        NotificationCenter.default.addObserver(self, selector: #selector(JournalViewController.updateJournal), name: Notification.Name.UIApplicationDidBecomeActive, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(JournalViewController.updateJournal), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
     
     override func viewDidDisappear(_ animated: Bool)
     {
-        NotificationCenter.default.removeObserver(self, name: Notification.Name.UIApplicationDidBecomeActive, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
     }
     
     override func viewDidLoad()
@@ -45,7 +48,7 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
         
         self.foodItems = []
         
-        let addBarButton: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.add, target: self, action: #selector(JournalViewController.pickFood(sender:)));
+        let addBarButton: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(JournalViewController.pickFood(_:)));
         
         self.navigationItem.rightBarButtonItem = addBarButton
         
@@ -57,12 +60,16 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
-    //MARK: - Button Action
-    
-    @IBAction func pickFood(sender: AnyObject)
+}
+
+//MARK: - Button Actions -
+
+fileprivate extension JournalViewController
+{
+    @objc
+    fileprivate func pickFood(_ sender: AnyObject)
     {
-        let pickFoodViewController = FoodPickerViewController(style: UITableViewStyle.plain)
+        let pickFoodViewController = FoodPickerViewController(style: .plain)
         pickFoodViewController.delegate = self
         
         self.navigationController?.pushViewController(pickFoodViewController, animated: true)
@@ -71,12 +78,13 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
     //MARK: - Reading HealthKit Data
     
     // Use for someone selector, can not be private.
-    func updateJournal()
+    @objc
+    fileprivate func updateJournal()
     {
         let calendar = Calendar.current
         let nowDate = Date()
         
-        let componentsUnit: Set<Calendar.Component>= [Calendar.Component.year, .month, .day]
+        let componentsUnit: Set<Calendar.Component> = [.year, .month, .day]
         let components: DateComponents = calendar.dateComponents(componentsUnit, from: nowDate)
         
         let stareDate: Date = calendar.date(from: components)!
@@ -92,7 +100,12 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
             [unowned self] (query, results, error) -> Void in
             
             guard let results = results else {
-                print("An error occured fetching the user's tracked food. In your app, try to handle this gracefully. The error was: \(error).")
+                
+                if let error = error {
+                    
+                    print("An error occured fetching the user's tracked food. In your app, try to handle this gracefully. The error was: \(error.localizedDescription).")
+                }
+                
                 abort()
             }
             
@@ -103,7 +116,7 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
                 for foodCorrelation in results {
                     // Create an FoodItem instance that contains the information we care about that's
                     // stored in the food correlation.
-                    let foodItem: FoodItem = self.foodItem(fromFoodCorrelation: foodCorrelation as! HKCorrelation)
+                    let foodItem: FoodItem = self.foodItem(from: foodCorrelation as! HKCorrelation)
                     
                     self.foodItems!.append(foodItem)
                 }
@@ -117,8 +130,13 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
             healthStore.execute(query)
         }
     }
-    
-    private func foodItem(fromFoodCorrelation foodCorrelation: HKCorrelation) -> FoodItem
+}
+
+// MARK: - Private Methods -
+
+fileprivate extension JournalViewController
+{
+    fileprivate func foodItem(from foodCorrelation: HKCorrelation) -> FoodItem
     {
         // Fetch the name fo the food.
         let foodName: String = foodCorrelation.metadata![HKMetadataKeyFoodType] as! String
@@ -132,24 +150,25 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
         let energyQuantityConsumed: HKQuantity = energyConsumedSample.quantity
         
         let joules: Double = energyQuantityConsumed.doubleValue(for: HKUnit.joule())
+        let foodItem = FoodItem(name: foodName, joules: joules)
         
-        return FoodItem.foodItem(name: foodName, joules: joules)
+        return foodItem
     }
     
     //MARK: - Writing HealthKit Data
     
-    private func addFoodItem(_ foodItem: FoodItem)
+    fileprivate func addFoodItem(_ foodItem: FoodItem)
     {
         // Create a new food correlation for the given food item.
-        let foodCorrelationForFoodItem: HKCorrelation = self.foodCorrelationForFoodItem(foodItem)
+        let foodCorrelationForFoodItem: HKCorrelation = self.foodCorrelation(for: foodItem)
         
         let completion: (Bool, Error?) -> Void = {
             [unowned self] (success, error) -> Void in
             
             DispatchQueue.main.async {
                 
-                if !success {
-                    print("An error occured saving the food %@. In your app, try to handle this gracefully. The error was: \(error)")
+                if let error = error {
+                    print("An error occured saving the food %@. In your app, try to handle this gracefully. The error was: \(error.localizedDescription)")
                     
                     return
                 }
@@ -158,7 +177,7 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
                 
                 let indexPathForInsertedFoodItem = IndexPath(row: 0, section: 0)
                 
-                self.tableView.insertRows(at: [indexPathForInsertedFoodItem], with: UITableViewRowAnimation.none)
+                self.tableView.insertRows(at: [indexPathForInsertedFoodItem], with: .none)
             }
         }
         
@@ -168,7 +187,7 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
         }
     }
     
-    private func foodCorrelationForFoodItem(_ foodItem: FoodItem) -> HKCorrelation
+    fileprivate func foodCorrelation(for foodItem: FoodItem) -> HKCorrelation
     {
         let nowDate = Date()
         
@@ -184,8 +203,13 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
         
         return foodCorrelation
     }
-    
-    //MARK: - UITableView DataSource Methods
+}
+
+// MARK: - Delegate Methods -
+
+extension JournalViewController: FoodPickerViewControllerDelegate
+{
+    //MARK: #UITableViewDataSource
     
     override func numberOfSections(in tableView: UITableView) -> Int 
     {
@@ -208,13 +232,13 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
         
         var cell: UITableViewCell? = tableView.dequeueReusableCell(withIdentifier: CellIdentifier)
         if cell == nil {
-            cell = UITableViewCell(style: UITableViewCellStyle.value1, reuseIdentifier: CellIdentifier)
+            cell = UITableViewCell(style: .value1, reuseIdentifier: CellIdentifier)
         }
         
         return cell!
     }
     
-    //MARK: - UITableView Delegate Methods
+    //MARK: #UITableViewDelegate
     
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) 
     {
@@ -236,7 +260,7 @@ class JournalViewController: UITableViewController, FoodPickerViewControllerDele
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    //MARK - FoodPickerViewController Delegate Method
+    //MARK #FoodPickerViewControllerDelegate
     
     func foodPicker(_ foodPicker: FoodPickerViewController, didSelectedFoodItem foodItem: FoodItem)
     {

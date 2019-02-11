@@ -39,18 +39,20 @@ class EnergyViewController: UITableViewController
         return energyFormatter
     }
     
-    override func viewWillAppear(_ animated: Bool) {
+    override func viewWillAppear(_ animated: Bool)
+    {
         super.viewWillAppear(animated)
         
         self.refreshStatistics()
         
-        NotificationCenter.default.addObserver(self, selector: #selector(EnergyViewController.refreshStatistics), name: Notification.Name.UIApplicationDidBecomeActive, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(EnergyViewController.refreshStatistics), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool)
+    {
         super.viewWillDisappear(animated)
         
-        NotificationCenter.default.removeObserver(self, name: Notification.Name.UIApplicationDidBecomeActive, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
     }
     
     override func viewDidLoad()
@@ -61,7 +63,7 @@ class EnergyViewController: UITableViewController
         self.title = self.navigationController?.title
         
         let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(EnergyViewController.refreshStatistics), for: UIControlEvents.valueChanged)
+        refreshControl.addTarget(self, action: #selector(EnergyViewController.refreshStatistics), for: .valueChanged)
         
         self.refreshControl = refreshControl
     }
@@ -71,9 +73,15 @@ class EnergyViewController: UITableViewController
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
+}
+
+// MARK: - Actions -
+
+fileprivate extension EnergyViewController
+{
     //MARK: - Reading HealthKit Data
     
+    @objc
     func refreshStatistics()
     {
         self.refreshControl!.beginRefreshing()
@@ -99,7 +107,11 @@ class EnergyViewController: UITableViewController
                     [unowned self] (basalEnergyBurn, error) -> Void in
                     
                     guard let basalEnergyBurn = basalEnergyBurn else {
-                        print("An error occurred trying to compute the basal energy burn. In your app, handle this gracefully. Error: \(error)")
+                        
+                        if let error = error {
+                            
+                            print("An error occurred trying to compute the basal energy burn. In your app, handle this gracefully. Error: \(error.localizedDescription)")
+                        }
                         
                         return
                     }
@@ -161,7 +173,8 @@ class EnergyViewController: UITableViewController
         let weightType = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bodyMass)!
         let heightType = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.height)!
         
-        let queryWeigth: HKCompletionHandle = {
+        let queryWeigth: HKHealthStore.CompletionHandler = {
+            
             (weight, error) -> Void in
             
             guard let weight = weight else {
@@ -170,7 +183,7 @@ class EnergyViewController: UITableViewController
                 return
             }
             
-            let queryHeigth: HKCompletionHandle = {
+            let queryHeigth: HKHealthStore.CompletionHandler = {
                 (height, error) -> Void in
                 
                 if height == nil {
@@ -305,8 +318,13 @@ class EnergyViewController: UITableViewController
         
         return stringOfJourle
     }
-    
-    //MARK: - UITableView DataSource Methods
+}
+
+// MARK: - Delegate Methods -
+
+extension EnergyViewController
+{
+    //MARK: #UITableViewDataSource
     
     override func numberOfSections(in tableView: UITableView) -> Int 
     {
@@ -324,7 +342,7 @@ class EnergyViewController: UITableViewController
         
         var cell: UITableViewCell? = tableView.dequeueReusableCell(withIdentifier: CellIdentifier)
         if cell == nil {
-            cell = UITableViewCell(style: UITableViewCellStyle.value1, reuseIdentifier: CellIdentifier)
+            cell = UITableViewCell(style: .value1, reuseIdentifier: CellIdentifier)
             cell!.selectionStyle = .none
         }
         

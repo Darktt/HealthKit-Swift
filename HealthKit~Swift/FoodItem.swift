@@ -10,15 +10,8 @@ import UIKit
 
 class FoodItem: NSObject
 {
-    private(set) var name: String
-    private(set) var joules: Double
-    
-    class func foodItem(name: String, joules: Double) -> FoodItem
-    {
-        let item: FoodItem = FoodItem(name: name, joules: joules)
-        
-        return item
-    }
+    fileprivate(set) var name: String
+    fileprivate(set) var joules: Double
     
     init(name: String, joules: Double) 
     {

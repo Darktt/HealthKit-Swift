@@ -19,7 +19,7 @@ class FoodPickerViewController: UITableViewController
 {
     var delegate: FoodPickerViewControllerDelegate?
     
-    private var foodItems: [FoodItem] {
+    fileprivate var foodItems: [FoodItem] {
         
         var foodItems = Array<FoodItem>() 
         foodItems.append(FoodItem(name: "Wheat Bagel", joules: 240000.0))
@@ -36,7 +36,7 @@ class FoodPickerViewController: UITableViewController
         return foodItems
     }
     
-    private var energyFormatter: EnergyFormatter {
+    fileprivate lazy var energyFormatter: EnergyFormatter = {
         
         let energyFormatter = EnergyFormatter()
         energyFormatter.unitStyle = Formatter.UnitStyle.long
@@ -44,7 +44,7 @@ class FoodPickerViewController: UITableViewController
         energyFormatter.numberFormatter.maximumFractionDigits = 2
         
         return energyFormatter
-    }
+    }()
     
     override func viewDidLoad()
     {
@@ -59,8 +59,13 @@ class FoodPickerViewController: UITableViewController
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
-    //MARK: - UITableView DataSource Methods
+}
+
+// MARK: - Delegate Methods -
+
+extension FoodPickerViewController
+{
+    //MARK: #UITableViewDataSource
     
     override func numberOfSections(in tableView: UITableView) -> Int 
     {
@@ -78,19 +83,19 @@ class FoodPickerViewController: UITableViewController
         
         var cell: UITableViewCell? = tableView.dequeueReusableCell(withIdentifier: CellIdentifier)
         if cell == nil {
-            cell = UITableViewCell(style: UITableViewCellStyle.value1, reuseIdentifier: CellIdentifier)
+            cell = UITableViewCell(style: UITableViewCell.CellStyle.value1, reuseIdentifier: CellIdentifier)
         }
         
         let foodItem: FoodItem = self.foodItems[indexPath.row]
-        cell!.textLabel!.text = foodItem.name
+        cell?.textLabel?.text = foodItem.name
         
         let energyFormatter: EnergyFormatter = self.energyFormatter
-        cell!.detailTextLabel!.text = energyFormatter.string(fromJoules: foodItem.joules)
+        cell?.detailTextLabel?.text = energyFormatter.string(fromJoules: foodItem.joules)
         
         return cell!
     }
     
-    //MARK: - UITableView Delegate Methods
+    //MARK: UITableViewDelegate
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
     {
