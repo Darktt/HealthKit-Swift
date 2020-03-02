@@ -67,7 +67,7 @@ class JournalViewController: UITableViewController
 fileprivate extension JournalViewController
 {
     @objc
-    fileprivate func pickFood(_ sender: AnyObject)
+    func pickFood(_ sender: AnyObject)
     {
         let pickFoodViewController = FoodPickerViewController(style: .plain)
         pickFoodViewController.delegate = self
@@ -79,7 +79,7 @@ fileprivate extension JournalViewController
     
     // Use for someone selector, can not be private.
     @objc
-    fileprivate func updateJournal()
+    func updateJournal()
     {
         let calendar = Calendar.current
         let nowDate = Date()
@@ -136,7 +136,7 @@ fileprivate extension JournalViewController
 
 fileprivate extension JournalViewController
 {
-    fileprivate func foodItem(from foodCorrelation: HKCorrelation) -> FoodItem
+    func foodItem(from foodCorrelation: HKCorrelation) -> FoodItem
     {
         // Fetch the name fo the food.
         let foodName: String = foodCorrelation.metadata![HKMetadataKeyFoodType] as! String
@@ -157,7 +157,7 @@ fileprivate extension JournalViewController
     
     //MARK: - Writing HealthKit Data
     
-    fileprivate func addFoodItem(_ foodItem: FoodItem)
+    func addFoodItem(_ foodItem: FoodItem)
     {
         // Create a new food correlation for the given food item.
         let foodCorrelationForFoodItem: HKCorrelation = self.foodCorrelation(for: foodItem)
@@ -187,7 +187,7 @@ fileprivate extension JournalViewController
         }
     }
     
-    fileprivate func foodCorrelation(for foodItem: FoodItem) -> HKCorrelation
+    func foodCorrelation(for foodItem: FoodItem) -> HKCorrelation
     {
         let nowDate = Date()
         
